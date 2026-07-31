@@ -14,3 +14,8 @@ export const deleteDevice = async (schoolId, deviceId) => {
   const res = await api.delete(`/easyreach/schools/${schoolId}/devices/${deviceId}`)
   return res.data
 }
+
+export const getCommandResult = async (commandId) => {
+  const res = await api.get(`/easyreach/agent/command-result/${commandId}`)
+  return res.data
+}

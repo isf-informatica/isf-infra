@@ -2,8 +2,25 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 
-const inputCls = "w-full rounded-xl px-4 py-2.5 text-sm border border-[#D4E8FF] bg-white text-[#1E3A5F] outline-none focus:border-[#60A5FA] placeholder-[#A0B8D0]"
-const labelCls = "block text-xs font-medium text-[#5B7FA6] mb-1.5"
+const C = {
+  bgApp: '#F6F8FB',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F8FAFC',
+  border: '#E4E9F2',
+  textPrimary: '#101828',
+  textSecondary: '#667085',
+  textMuted: '#98A2B3',
+  brandFrom: '#3B6FE0',
+  brandTo: '#16B8A6',
+  systemBg: '#EDF3FF',
+  systemBorder: '#D8E6FF',
+  success: '#17B26A',
+  successBg: '#ECFDF5',
+  successBorder: '#A7E9C8',
+}
+
+const inputCls = "w-full rounded-xl px-4 py-2.5 text-[13.5px] outline-none transition-colors"
+const labelCls = "block text-[12px] font-medium mb-1.5"
 
 export default function DefaultTemplate() {
   const navigate = useNavigate()
@@ -265,57 +282,66 @@ Support: support@easylearn.org.in
   }
 
   const typeOptions = [
-    { value: 'school', label: '🏫 School' },
-    { value: 'college', label: '🎓 College' },
-    { value: 'institute', label: '🏛️ Institute' },
+    { value: 'school', label: 'School', icon: 'ti-school' },
+    { value: 'college', label: 'College', icon: 'ti-certificate' },
+    { value: 'institute', label: 'Institute', icon: 'ti-building-bank' },
   ]
 
+  const Section = ({ title }) => (
+    <div className="flex items-center gap-2 mb-4">
+      <span className="text-[12px] font-semibold" style={{ color: C.brandFrom }}>{title}</span>
+      <div className="flex-1 h-px" style={{ background: C.border }} />
+    </div>
+  )
+
   return (
-    <div className="min-h-screen" style={{background:'#F0F7FF'}}>
+    <div className="min-h-screen" style={{ background: C.bgApp }}>
       {/* Topbar */}
-      <div className="flex items-center gap-4 px-6 py-3.5 bg-white border-b border-[#E0EEFF]">
-        <button onClick={() => navigate('/dashboard')} className="text-sm text-[#7BA7C7] hover:text-[#1E3A5F]">← Back</button>
-        <div className="w-px h-4 bg-[#D4E8FF]" />
+      <div className="flex items-center gap-4 px-7 py-4" style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
+        <button onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-1.5 text-[13px] font-medium cursor-pointer bg-transparent border-none" style={{ color: C.textSecondary }}>
+          <i className="ti ti-arrow-left text-sm" aria-hidden="true"></i> Back
+        </button>
+        <div className="w-px h-5" style={{ background: C.border }} />
         <div>
-          <div className="text-sm font-medium text-[#1E3A5F]">General config template</div>
-          <div className="text-xs text-[#7BA7C7]">Generate setup files for any institution</div>
+          <div className="text-[14.5px] font-semibold" style={{ color: C.textPrimary }}>General config template</div>
+          <div className="text-[12px]" style={{ color: C.textSecondary }}>Generate setup files for any institution</div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto py-8 px-6">
+      <div className="max-w-2xl mx-auto py-9 px-6">
         {/* Info banner */}
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl mb-6 border border-[#C7E6FF]" style={{background:'linear-gradient(135deg,#EBF4FF,#E8FFF5)'}}>
-          <i className="ti ti-info-circle text-[#1D6FAD] text-lg mt-0.5" aria-hidden="true"></i>
+        <div className="flex items-start gap-3.5 px-5 py-4 rounded-2xl mb-7"
+          style={{ background: `linear-gradient(120deg, ${C.systemBg}, ${C.successBg})`, border: `1px solid ${C.systemBorder}` }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: C.surface }}>
+            <i className="ti ti-info-circle text-base" style={{ color: C.brandFrom }} aria-hidden="true"></i>
+          </div>
           <div>
-            <div className="text-sm font-medium text-[#1E3A5F]">Fill details → Download ZIP</div>
-            <div className="text-xs text-[#5B7FA6] mt-1">ZIP will contain: nginx.conf, sync_aws.bat, backup.bat, start_nginx.bat, web.config, setup_tasks.ps1, README.txt</div>
+            <div className="text-[13.5px] font-semibold" style={{ color: C.textPrimary }}>Fill details → download ZIP</div>
+            <div className="text-[12px] mt-1" style={{ color: C.textSecondary }}>ZIP will contain: nginx.conf, sync_aws.bat, backup.bat, start_nginx.bat, web.config, setup_tasks.ps1, README.txt</div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-[#D4E8FF]" style={{boxShadow:'0 4px 20px rgba(96,165,250,0.08)'}}>
+        <div className="rounded-2xl p-7" style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 4px 24px -8px rgba(16,24,40,0.08)' }}>
           {/* Institution type */}
-          <div className="mb-5">
-            <label className={labelCls}>Institution type</label>
+          <div className="mb-6">
+            <label className={labelCls} style={{ color: C.textSecondary }}>Institution type</label>
             <div className="flex gap-2">
-              {typeOptions.map(({ value, label }) => (
+              {typeOptions.map(({ value, label, icon }) => (
                 <button key={value} onClick={() => update('institution_type', value)}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
-                    form.institution_type === value
-                      ? 'bg-[#EBF5FF] text-[#1D6FAD] border-[#60A5FA]'
-                      : 'bg-[#F5F9FF] text-[#7BA7C7] border-[#D4E8FF] hover:border-[#A8D5FF]'
-                  }`}>
-                  {label}
+                  className="flex-1 py-2.5 rounded-xl text-[12.5px] font-semibold cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                  style={form.institution_type === value
+                    ? { background: C.systemBg, color: C.brandFrom, border: `1.5px solid ${C.brandFrom}` }
+                    : { background: C.surfaceAlt, color: C.textMuted, border: `1px solid ${C.border}` }}>
+                  <i className={`ti ${icon} text-sm`} aria-hidden="true"></i>{label}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Section: Basic info */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-medium text-[#1D6FAD]">Basic info</span>
-            <div className="flex-1 h-px bg-[#D4E8FF]" />
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-5">
+          <Section title="Basic info" />
+          <div className="grid grid-cols-2 gap-4 mb-6">
             {[
               ['Institution name', 'institution_name', 'MBSE School'],
               ['Short code', 'institution_code', 'mbse'],
@@ -325,19 +351,16 @@ Support: support@easylearn.org.in
               ['Contact email', 'contact_email', 'admin@school.edu.in'],
             ].map(([label, key, placeholder]) => (
               <div key={key}>
-                <label className={labelCls}>{label}</label>
+                <label className={labelCls} style={{ color: C.textSecondary }}>{label}</label>
                 <input value={form[key]} onChange={e => update(key, e.target.value)}
-                  placeholder={placeholder} className={inputCls} />
+                  placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
               </div>
             ))}
           </div>
 
           {/* Section: Server */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-medium text-[#1D6FAD]">Server config</span>
-            <div className="flex-1 h-px bg-[#D4E8FF]" />
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-5">
+          <Section title="Server config" />
+          <div className="grid grid-cols-2 gap-4 mb-6">
             {[
               ['Public IP', 'public_ip', '118.185.90.46'],
               ['LAN IP', 'lan_ip', '192.168.12.21'],
@@ -346,15 +369,16 @@ Support: support@easylearn.org.in
               ['SSL thumbprint', 'ssl_thumbprint', '3590B6261F...'],
             ].map(([label, key, placeholder]) => (
               <div key={key}>
-                <label className={labelCls}>{label}</label>
+                <label className={labelCls} style={{ color: C.textSecondary }}>{label}</label>
                 <input value={form[key]} onChange={e => update(key, e.target.value)}
-                  placeholder={placeholder} className={inputCls} />
+                  placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
               </div>
             ))}
             <div>
-              <label className={labelCls}>Sync interval (min)</label>
+              <label className={labelCls} style={{ color: C.textSecondary }}>Sync interval (min)</label>
               <select value={form.sync_interval_min}
-                onChange={e => update('sync_interval_min', parseInt(e.target.value))} className={inputCls}>
+                onChange={e => update('sync_interval_min', parseInt(e.target.value))} className={inputCls}
+                style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}>
                 <option value={5}>Every 5 min</option>
                 <option value={15}>Every 15 min</option>
                 <option value={30}>Every 30 min</option>
@@ -362,58 +386,58 @@ Support: support@easylearn.org.in
               </select>
             </div>
             <div>
-              <label className={labelCls}>Nginx port</label>
+              <label className={labelCls} style={{ color: C.textSecondary }}>Nginx port</label>
               <input type="number" value={form.nginx_port}
-                onChange={e => update('nginx_port', parseInt(e.target.value))} className={inputCls} />
+                onChange={e => update('nginx_port', parseInt(e.target.value))} className={inputCls}
+                style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
             </div>
             <div>
-              <label className={labelCls}>HTTPS port</label>
+              <label className={labelCls} style={{ color: C.textSecondary }}>HTTPS port</label>
               <input type="number" value={form.https_port}
-                onChange={e => update('https_port', parseInt(e.target.value))} className={inputCls} />
+                onChange={e => update('https_port', parseInt(e.target.value))} className={inputCls}
+                style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
             </div>
           </div>
 
           {/* Section: AWS Folders */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-medium text-[#1D6FAD]">AWS folders to sync</span>
-            <div className="flex-1 h-px bg-[#D4E8FF]" />
-          </div>
-          <div className="mb-5">
-            <label className={labelCls}>Folder names (comma separated)</label>
+          <Section title="AWS folders to sync" />
+          <div className="mb-6">
+            <label className={labelCls} style={{ color: C.textSecondary }}>Folder names (comma separated)</label>
             <input value={form.aws_folders} onChange={e => update('aws_folders', e.target.value)}
-              placeholder="easylearn-ncert,NCERT Course video,SAAR" className={inputCls} />
-            <p className="text-xs text-[#A0B8D0] mt-1.5">These folders will be synced from easylearn1 S3 bucket</p>
+              placeholder="easylearn-ncert,NCERT Course video,SAAR" className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+            <p className="text-[11.5px] mt-1.5" style={{ color: C.textMuted }}>These folders will be synced from easylearn1 S3 bucket</p>
           </div>
 
           {/* Section: Backup */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-medium text-[#1D6FAD]">Backup config</span>
-            <div className="flex-1 h-px bg-[#D4E8FF]" />
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <Section title="Backup config" />
+          <div className="grid grid-cols-2 gap-4 mb-7">
             {[
               ['GoDaddy FTP host', 'godaddy_ftp_host', '184.168.118.87'],
               ['GoDaddy FTP user', 'godaddy_ftp_user', 'backup@fortimates.com'],
             ].map(([label, key, placeholder]) => (
               <div key={key}>
-                <label className={labelCls}>{label}</label>
+                <label className={labelCls} style={{ color: C.textSecondary }}>{label}</label>
                 <input value={form[key]} onChange={e => update(key, e.target.value)}
-                  placeholder={placeholder} className={inputCls} />
+                  placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
               </div>
             ))}
           </div>
 
           {done && (
-            <div className="flex items-center gap-2 rounded-xl px-4 py-3 mb-4 text-sm bg-[#E8FFF5] border border-[#A7F0D4] text-[#1A6B4A]">
+            <div className="flex items-center gap-2 rounded-xl px-4 py-3 mb-4 text-[13px] font-medium" style={{ background: C.successBg, border: `1px solid ${C.successBorder}`, color: C.success }}>
               <i className="ti ti-circle-check" aria-hidden="true"></i>
               Config files downloaded! Now follow the setup guide.
             </div>
           )}
 
           <button onClick={handleDownload} disabled={loading}
-            className="w-full py-3 rounded-xl text-sm font-semibold text-white border-none cursor-pointer disabled:opacity-60"
-            style={{background:'linear-gradient(135deg,#60A5FA,#34D399)',boxShadow:'0 4px 12px rgba(96,165,250,0.25)'}}>
-            {loading ? 'Generating...' : '⬇ Download config ZIP'}
+            className="w-full py-3.5 rounded-xl text-[13.5px] font-semibold text-white border-none cursor-pointer disabled:opacity-60 shadow-sm"
+            style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
+            {loading ? (
+              <span className="flex items-center justify-center gap-2"><i className="ti ti-loader-2 animate-spin" aria-hidden="true"></i> Generating…</span>
+            ) : (
+              <span className="flex items-center justify-center gap-2"><i className="ti ti-download" aria-hidden="true"></i> Download config ZIP</span>
+            )}
           </button>
         </div>
       </div>

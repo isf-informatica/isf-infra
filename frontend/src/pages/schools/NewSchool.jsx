@@ -2,8 +2,28 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createSchool } from '../../api/schools'
 
-const inputCls = "w-full rounded-xl px-4 py-2.5 text-sm border border-[#D4E8FF] bg-white text-[#1E3A5F] outline-none focus:border-[#60A5FA] placeholder-[#A0B8D0]"
-const labelCls = "block text-xs font-medium text-[#5B7FA6] mb-1.5"
+const C = {
+  bgApp: '#F6F8FB',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F8FAFC',
+  border: '#E4E9F2',
+  textPrimary: '#101828',
+  textSecondary: '#667085',
+  textMuted: '#98A2B3',
+  brandFrom: '#3B6FE0',
+  brandTo: '#16B8A6',
+  systemBg: '#EDF3FF',
+  systemBorder: '#D8E6FF',
+  success: '#17B26A',
+  successBg: '#ECFDF5',
+  successBorder: '#A7E9C8',
+  danger: '#E4483C',
+  dangerBg: '#FEF1F0',
+  dangerBorder: '#FBD5D2',
+}
+
+const inputCls = "w-full rounded-xl px-4 py-2.5 text-[13.5px] outline-none transition-colors"
+const labelCls = "block text-[12px] font-medium mb-1.5"
 
 export default function NewSchool() {
   const navigate = useNavigate()
@@ -32,59 +52,63 @@ export default function NewSchool() {
 
   const steps = ['Institution details', 'Server config', 'Review']
   const typeOptions = [
-    { value: 'school', label: '🏫 School' },
-    { value: 'college', label: '🎓 College' },
-    { value: 'institute', label: '🏛️ Institute' },
+    { value: 'school', label: 'School', icon: 'ti-school' },
+    { value: 'college', label: 'College', icon: 'ti-certificate' },
+    { value: 'institute', label: 'Institute', icon: 'ti-building-bank' },
   ]
 
   return (
-    <div className="min-h-screen" style={{background:'#F0F7FF'}}>
+    <div className="min-h-screen" style={{ background: C.bgApp }}>
       {/* Topbar */}
-      <div className="flex items-center gap-4 px-6 py-3.5 bg-white border-b border-[#E0EEFF]">
-        <button onClick={() => navigate('/dashboard')} className="text-sm text-[#7BA7C7] hover:text-[#1E3A5F]">← Back</button>
-        <div className="w-px h-4 bg-[#D4E8FF]" />
-        <div className="text-sm font-medium text-[#1E3A5F]">New institution deployment</div>
+      <div className="flex items-center gap-4 px-7 py-4" style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
+        <button onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-1.5 text-[13px] font-medium cursor-pointer bg-transparent border-none" style={{ color: C.textSecondary }}>
+          <i className="ti ti-arrow-left text-sm" aria-hidden="true"></i> Back
+        </button>
+        <div className="w-px h-5" style={{ background: C.border }} />
+        <div className="text-[14.5px] font-semibold" style={{ color: C.textPrimary }}>New institution deployment</div>
       </div>
 
-      <div className="max-w-xl mx-auto py-8 px-6">
+      <div className="max-w-xl mx-auto py-9 px-6">
         {/* Steps */}
         <div className="flex items-center mb-8">
           {steps.map((label, i) => (
             <div key={i} className="flex items-center flex-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border ${
-                  step > i+1 ? 'bg-[#34D399] border-[#34D399] text-white' :
-                  step === i+1 ? 'bg-[#60A5FA] border-[#60A5FA] text-white' :
-                  'bg-white border-[#C7E6FF] text-[#A0B8D0]'
-                }`}>
-                  {step > i+1 ? '✓' : i+1}
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0"
+                  style={
+                    step > i + 1 ? { background: C.success, color: '#fff' } :
+                    step === i + 1 ? { background: C.brandFrom, color: '#fff' } :
+                    { background: C.surface, border: `1px solid ${C.border}`, color: C.textMuted }
+                  }>
+                  {step > i + 1 ? <i className="ti ti-check text-[13px]" aria-hidden="true"></i> : i + 1}
                 </div>
-                <span className={`text-xs font-medium ${step===i+1?'text-[#1D6FAD]':step>i+1?'text-[#1A6B4A]':'text-[#A0B8D0]'}`}>
+                <span className="text-[12.5px] font-medium hidden sm:inline"
+                  style={{ color: step === i + 1 ? C.brandFrom : step > i + 1 ? C.success : C.textMuted }}>
                   {label}
                 </span>
               </div>
-              {i < 2 && <div className={`flex-1 h-px mx-3 ${step>i+1?'bg-[#A7F0D4]':'bg-[#D4E8FF]'}`} />}
+              {i < 2 && <div className="flex-1 h-px mx-3" style={{ background: step > i + 1 ? C.successBorder : C.border }} />}
             </div>
           ))}
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl p-6 border border-[#D4E8FF]" style={{boxShadow:'0 4px 20px rgba(96,165,250,0.08)'}}>
+        <div className="rounded-2xl p-7" style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 4px 24px -8px rgba(16,24,40,0.08)' }}>
 
           {step === 1 && (
             <div>
-              <div className="text-sm font-medium text-[#1E3A5F] mb-5">Institution details</div>
+              <div className="text-[14.5px] font-semibold mb-5" style={{ color: C.textPrimary }}>Institution details</div>
               <div className="mb-5">
-                <label className={labelCls}>Institution type</label>
+                <label className={labelCls} style={{ color: C.textSecondary }}>Institution type</label>
                 <div className="flex gap-2">
-                  {typeOptions.map(({ value, label }) => (
+                  {typeOptions.map(({ value, label, icon }) => (
                     <button key={value} onClick={() => update('institution_type', value)}
-                      className={`flex-1 py-2.5 rounded-xl text-xs font-medium border transition-all ${
-                        form.institution_type === value
-                          ? 'bg-[#EBF5FF] text-[#1D6FAD] border-[#60A5FA]'
-                          : 'bg-[#F5F9FF] text-[#7BA7C7] border-[#D4E8FF] hover:border-[#A8D5FF]'
-                      }`}>
-                      {label}
+                      className="flex-1 py-3 rounded-xl text-[12.5px] font-semibold transition-all flex items-center justify-center gap-1.5"
+                      style={form.institution_type === value
+                        ? { background: C.systemBg, color: C.brandFrom, border: `1.5px solid ${C.brandFrom}` }
+                        : { background: C.surfaceAlt, color: C.textMuted, border: `1px solid ${C.border}` }}>
+                      <i className={`ti ${icon} text-sm`} aria-hidden="true"></i>{label}
                     </button>
                   ))}
                 </div>
@@ -99,9 +123,9 @@ export default function NewSchool() {
                   ['DB name', 'db_name', 'mbsc_easylearn'],
                 ].map(([label, key, placeholder]) => (
                   <div key={key}>
-                    <label className={labelCls}>{label}</label>
+                    <label className={labelCls} style={{ color: C.textSecondary }}>{label}</label>
                     <input value={form[key]} onChange={e => update(key, e.target.value)}
-                      placeholder={placeholder} className={inputCls} />
+                      placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
                   </div>
                 ))}
               </div>
@@ -110,7 +134,7 @@ export default function NewSchool() {
 
           {step === 2 && (
             <div>
-              <div className="text-sm font-medium text-[#1E3A5F] mb-5">Server configuration</div>
+              <div className="text-[14.5px] font-semibold mb-5" style={{ color: C.textPrimary }}>Server configuration</div>
               <div className="grid grid-cols-2 gap-4">
                 {[
                   ['Public IP', 'public_ip', '118.185.90.46'],
@@ -120,25 +144,28 @@ export default function NewSchool() {
                   ['SSL thumbprint', 'ssl_thumbprint', '3590B6261F...'],
                 ].map(([label, key, placeholder]) => (
                   <div key={key}>
-                    <label className={labelCls}>{label}</label>
+                    <label className={labelCls} style={{ color: C.textSecondary }}>{label}</label>
                     <input value={form[key]} onChange={e => update(key, e.target.value)}
-                      placeholder={placeholder} className={inputCls} />
+                      placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
                   </div>
                 ))}
                 <div>
-                  <label className={labelCls}>Nginx port</label>
+                  <label className={labelCls} style={{ color: C.textSecondary }}>Nginx port</label>
                   <input type="number" value={form.nginx_port}
-                    onChange={e => update('nginx_port', parseInt(e.target.value))} className={inputCls} />
+                    onChange={e => update('nginx_port', parseInt(e.target.value))} className={inputCls}
+                    style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
                 </div>
                 <div>
-                  <label className={labelCls}>HTTPS port</label>
+                  <label className={labelCls} style={{ color: C.textSecondary }}>HTTPS port</label>
                   <input type="number" value={form.https_port}
-                    onChange={e => update('https_port', parseInt(e.target.value))} className={inputCls} />
+                    onChange={e => update('https_port', parseInt(e.target.value))} className={inputCls}
+                    style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
                 </div>
                 <div className="col-span-2">
-                  <label className={labelCls}>Sync interval</label>
+                  <label className={labelCls} style={{ color: C.textSecondary }}>Sync interval</label>
                   <select value={form.sync_interval_min}
-                    onChange={e => update('sync_interval_min', parseInt(e.target.value))} className={inputCls}>
+                    onChange={e => update('sync_interval_min', parseInt(e.target.value))} className={inputCls}
+                    style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}>
                     <option value={5}>Every 5 minutes</option>
                     <option value={15}>Every 15 minutes</option>
                     <option value={30}>Every 30 minutes</option>
@@ -151,8 +178,8 @@ export default function NewSchool() {
 
           {step === 3 && (
             <div>
-              <div className="text-sm font-medium text-[#1E3A5F] mb-5">Review & confirm</div>
-              <div className="bg-[#F5F9FF] rounded-xl p-4 border border-[#D4E8FF]">
+              <div className="text-[14.5px] font-semibold mb-5" style={{ color: C.textPrimary }}>Review & confirm</div>
+              <div className="rounded-xl p-4" style={{ background: C.surfaceAlt, border: `1px solid ${C.border}` }}>
                 {[
                   ['Type', form.institution_type],
                   ['Name', form.name],
@@ -166,37 +193,37 @@ export default function NewSchool() {
                   ['Ports', `Nginx :${form.nginx_port} · HTTPS :${form.https_port}`],
                   ['Sync', `Every ${form.sync_interval_min} min`],
                 ].map(([label, value]) => (
-                  <div key={label} className="flex justify-between items-center py-2 border-b border-[#E0EEFF] last:border-0">
-                    <span className="text-xs text-[#7BA7C7]">{label}</span>
-                    <span className="text-xs font-medium text-[#1E3A5F]">{value || '—'}</span>
+                  <div key={label} className="flex justify-between items-center py-2.5" style={{ borderBottom: `1px solid ${C.border}` }}>
+                    <span className="text-[12px]" style={{ color: C.textSecondary }}>{label}</span>
+                    <span className="text-[12.5px] font-medium" style={{ color: C.textPrimary }}>{value || '—'}</span>
                   </div>
                 ))}
               </div>
               {error && (
-                <div className="mt-4 rounded-xl px-4 py-3 text-xs bg-[#FFF0F0] border border-[#FFCDD2] text-[#C62828]">
-                  ✗ {error}
+                <div className="mt-4 rounded-xl px-4 py-3 text-[12.5px] font-medium" style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, color: C.danger }}>
+                  <i className="ti ti-x mr-1" aria-hidden="true"></i>{error}
                 </div>
               )}
             </div>
           )}
 
-          <div className="flex justify-between items-center mt-6 pt-5 border-t border-[#E0EEFF]">
-            <button onClick={() => step > 1 ? setStep(step-1) : navigate('/dashboard')}
-              className="text-sm text-[#7BA7C7] hover:text-[#1E3A5F]">
+          <div className="flex justify-between items-center mt-6 pt-5" style={{ borderTop: `1px solid ${C.border}` }}>
+            <button onClick={() => step > 1 ? setStep(step - 1) : navigate('/dashboard')}
+              className="text-[13px] font-medium cursor-pointer bg-transparent border-none" style={{ color: C.textSecondary }}>
               {step === 1 ? 'Cancel' : '← Back'}
             </button>
             {step < 3 ? (
-              <button onClick={() => setStep(step+1)}
-                disabled={step===1 && (!form.name || !form.code)}
-                className="px-6 py-2.5 rounded-full text-sm font-medium text-white border-none cursor-pointer disabled:opacity-40"
-                style={{background:'linear-gradient(135deg,#60A5FA,#34D399)'}}>
+              <button onClick={() => setStep(step + 1)}
+                disabled={step === 1 && (!form.name || !form.code)}
+                className="px-6 py-2.5 rounded-xl text-[13.5px] font-semibold text-white border-none cursor-pointer disabled:opacity-40 shadow-sm"
+                style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
                 Next →
               </button>
             ) : (
               <button onClick={handleSubmit} disabled={loading}
-                className="px-6 py-2.5 rounded-full text-sm font-medium text-white border-none cursor-pointer disabled:opacity-40"
-                style={{background:'linear-gradient(135deg,#34D399,#60A5FA)'}}>
-                {loading ? 'Deploying...' : '✓ Deploy institution'}
+                className="px-6 py-2.5 rounded-xl text-[13.5px] font-semibold text-white border-none cursor-pointer disabled:opacity-40 shadow-sm"
+                style={{ background: `linear-gradient(135deg, ${C.success}, ${C.brandFrom})` }}>
+                {loading ? 'Deploying…' : 'Deploy institution ✓'}
               </button>
             )}
           </div>
