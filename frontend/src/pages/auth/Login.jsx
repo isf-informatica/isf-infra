@@ -16,7 +16,7 @@ export default function Login() {
     try {
       const data = await login(email, password)
       setAuth({ name: data.name, role: data.role, email }, data.access_token)
-      navigate('/dashboard')
+      navigate('/home')
     } catch { setError('Invalid email or password') }
     finally { setLoading(false) }
   }

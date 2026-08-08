@@ -135,7 +135,7 @@ export default function SmartSetup() {
       {/* Topbar */}
       <div className="flex items-center justify-between px-7 py-4" style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/dashboard')}
+          <button onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-[13px] font-medium cursor-pointer bg-transparent border-none" style={{ color: C.textSecondary }}>
             <i className="ti ti-arrow-left text-sm" aria-hidden="true"></i> Back
           </button>
@@ -463,7 +463,7 @@ export default function SmartSetup() {
 
           {/* Nav buttons */}
           <div className="flex justify-between items-center mt-6 pt-5" style={{ borderTop: `1px solid ${C.border}` }}>
-            <button onClick={() => step > 1 ? setStep(step - 1) : navigate('/dashboard')}
+            <button onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}
               className="text-[13px] font-medium cursor-pointer bg-transparent border-none" style={{ color: C.textSecondary }}>
               {step === 1 ? 'Cancel' : '← Back'}
             </button>

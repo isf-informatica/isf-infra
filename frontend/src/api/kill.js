@@ -1,7 +1,7 @@
 import api from './axios'
 
 export const killSchool = async (schoolId, level, reason, confirmationCode) => {
-  const res = await api.post(`/api/kill/${schoolId}/level/${level}`, {
+  const res = await api.post(`/easyreach/kill/${schoolId}/level/${level}`, {
     reason,
     confirmation_code: confirmationCode
   })
@@ -9,6 +9,6 @@ export const killSchool = async (schoolId, level, reason, confirmationCode) => {
 }
 
 export const restoreSchool = async (schoolId, level) => {
-  const res = await api.post(`/api/kill/${schoolId}/restore/${level}`, {})
+  const res = await api.post(`/easyreach/kill/${schoolId}/restore/${level}`, {})
   return res.data
 }

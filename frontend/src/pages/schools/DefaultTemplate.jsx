@@ -298,7 +298,7 @@ Support: support@easylearn.org.in
     <div className="min-h-screen" style={{ background: C.bgApp }}>
       {/* Topbar */}
       <div className="flex items-center gap-4 px-7 py-4" style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
-        <button onClick={() => navigate('/dashboard')}
+        <button onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-[13px] font-medium cursor-pointer bg-transparent border-none" style={{ color: C.textSecondary }}>
           <i className="ti ti-arrow-left text-sm" aria-hidden="true"></i> Back
         </button>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAllSchools } from '../../api/schools'
-import useAuthStore from '../../store/authStore'
+import Sidebar from '../../components/common/Sidebar'
+import Topbar from '../../components/common/Topbar'
 
 /* Shared design tokens — kept consistent across the whole app */
 const C = {
@@ -79,7 +80,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [editingLocationId, setEditingLocationId] = useState(null)
   const [locationForm, setLocationForm] = useState({ city: '', region: '' })
-  const { user, logout } = useAuthStore()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -139,32 +139,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen" style={{ background: C.bgApp }}>
-      {/* Topbar */}
-      <div className="flex items-center justify-between px-7 py-4" style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
-            <i className="ti ti-server-2 text-white text-lg" aria-hidden="true"></i>
-          </div>
-          <div>
-            <div className="text-[14.5px] font-semibold" style={{ color: C.textPrimary }}>EasyReach</div>
-            <div className="text-[12px]" style={{ color: C.textSecondary }}>ISF Media Server Control</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-semibold text-white shadow-sm"
-            style={{ background: `linear-gradient(135deg, ${C.server}, #A78BFA)` }}>
-            {user?.name?.[0]}
-          </div>
-          <span className="text-[13.5px] font-medium" style={{ color: C.textPrimary }}>{user?.name}</span>
-          <button onClick={() => { logout(); navigate('/login') }}
-            className="text-[12.5px] font-medium px-3.5 py-1.5 rounded-full cursor-pointer border"
-            style={{ color: C.danger, background: C.dangerBg, borderColor: C.dangerBorder }}>
-            Sign out
-          </button>
-        </div>
-      </div>
+      <Topbar C={C} />
 
-      <div className="px-7 py-7 max-w-7xl mx-auto">
+      <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
+        <Sidebar C={C} activeKey="mdm" />
+
+        <div className="flex-1 px-7 py-7 max-w-7xl mx-auto">
         {/* Hero banner */}
         <div className="flex items-center justify-between px-6 py-5 rounded-2xl mb-7"
           style={{ background: `linear-gradient(120deg, ${C.systemBg}, ${C.successBg})`, border: `1px solid ${C.systemBorder}` }}>
@@ -365,6 +345,7 @@ export default function Dashboard() {
             })}
           </div>
         )}
+        </div>
       </div>
     </div>
   )
