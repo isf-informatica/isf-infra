@@ -15,6 +15,7 @@ import ReportsView from './pages/mdm/ReportsView'
 import GeofencingView from './pages/mdm/GeofencingView'
 import EnrollmentView from './pages/mdm/EnrollmentView'
 import RemoteManagementView from './pages/mdm/RemoteManagementView'
+import InfraPointLanding from './pages/marketing/InfraPointLanding'
 import useAuthStore from './store/authStore'
 
 function ProtectedRoute({ children }) {
@@ -26,6 +27,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<InfraPointLanding />} />
+        <Route path="/about" element={<InfraPointLanding />} />
+
         <Route path="/login" element={<Login />} />
 
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
@@ -46,8 +50,6 @@ export default function App() {
         <Route path="/schools/:id/kill" element={<ProtectedRoute><KillSwitch /></ProtectedRoute>} />
         <Route path="/schools/:id/setup" element={<ProtectedRoute><SetupGuide /></ProtectedRoute>} />
         <Route path="/schools/:id/devices" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
-
-        <Route path="/" element={<Navigate to="/home" />} />
       </Routes>
     </BrowserRouter>
   )
