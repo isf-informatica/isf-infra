@@ -2,21 +2,39 @@ import useAuthStore from '../../store/authStore'
 import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
-/* Same tokens as Dashboard.jsx — kept identical so every page in the app matches. */
+/* Shared design tokens — matched to the Login screen's ink / cream palette,
+   same as Dashboard.jsx. Key names are unchanged so Sidebar/Topbar (which
+   already accept a C prop) pick up the new palette automatically. */
+const INK = '#1A1A18'
+const SUB = '#5C5C57'
+const MUTED = '#8A8A85'
+
 const C = {
-  bgApp: '#F6F8FB',
+  bgApp: '#E8E8E3',
   surface: '#FFFFFF',
-  surfaceAlt: '#F8FAFC',
-  border: '#E4E9F2',
-  borderStrong: '#D8E0EC',
-  textPrimary: '#101828',
-  textSecondary: '#667085',
-  textMuted: '#98A2B3',
-  brandFrom: '#3B6FE0',
-  brandTo: '#16B8A6',
-  server: '#7C5CFC',
-  systemBg: '#EDF3FF',
-  systemBorder: '#D8E6FF',
+  surfaceAlt: '#F2F2EE',
+  border: INK + '1F',
+  borderStrong: INK + '3D',
+  textPrimary: INK,
+  textSecondary: SUB,
+  textMuted: MUTED,
+  brandFrom: INK,
+  brandTo: '#3A3A36',
+  server: '#4A4A46',
+  serverBg: '#F2F2EE',
+  serverBorder: INK + '3D',
+  system: INK,
+  systemBg: '#F2F2EE',
+  systemBorder: INK + '3D',
+  success: '#2F6B45',
+  successBg: '#EAF3EC',
+  successBorder: '#BFDAC8',
+  danger: '#8A2A2A',
+  dangerBg: '#FDECEC',
+  dangerBorder: '#E8A5A5',
+  warning: '#8A6816',
+  warningBg: '#FBF3E0',
+  warningBorder: '#E7D39C',
 }
 
 export default function Home() {

@@ -6,11 +6,15 @@ import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 import SchoolCards from '../../components/mdm/SchoolCards'
 
-/* Light tokens for the outer app shell (Topbar/Sidebar/school picker) — unchanged elsewhere. */
+/* Light tokens for the outer app shell (Topbar/Sidebar/school picker) — matches
+   Login.jsx / MdmHub.jsx / EnrollmentView.jsx (ink/grey/white). */
+const INK = '#1A1A18'
+const SUB = '#5C5C57'
+const MUTED = '#8A8A85'
 const C = {
-  bgApp: '#F6F8FB', surface: '#FFFFFF', border: '#E4E9F2',
-  textPrimary: '#101828', textSecondary: '#667085', textMuted: '#98A2B3',
-  brandFrom: '#3B6FE0', brandTo: '#16B8A6',
+  bgApp: '#E8E8E3', surface: '#FFFFFF', border: INK + '1F',
+  textPrimary: INK, textSecondary: SUB, textMuted: MUTED,
+  brandFrom: INK, brandTo: '#3A3A36',
 }
 
 /* VS Code Dark+ palette — used only inside the IDE workspace below. */
@@ -262,7 +266,7 @@ export default function RemoteManagementView() {
     ? [...COMMON_COMMANDS, ...SERVER_ONLY_COMMANDS] : COMMON_COMMANDS
 
   return (
-    <div className="min-h-screen" style={{ background: C.bgApp }}>
+    <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
       <Topbar C={C} />
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
         <Sidebar C={C} activeKey="mdm" />

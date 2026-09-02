@@ -3,18 +3,23 @@ import { getAllSchools } from '../../api/schools'
 import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
-/* Same tokens as Dashboard.jsx — kept identical so every page in the app matches. */
+/* Same tokens as Login.jsx / MdmHub.jsx — kept identical so every page in the app matches. */
+const INK = '#1A1A18'
+const SUB = '#5C5C57'
+const MUTED = '#8A8A85'
+
 const C = {
-  bgApp: '#F6F8FB',
+  bgApp: '#E8E8E3',
   surface: '#FFFFFF',
-  border: '#E4E9F2',
-  textPrimary: '#101828',
-  textSecondary: '#667085',
-  textMuted: '#98A2B3',
-  brandFrom: '#3B6FE0',
-  systemBg: '#EDF3FF',
-  systemBorder: '#D8E6FF',
-  surfaceAlt: '#F8FAFC',
+  border: INK + '1F',
+  textPrimary: INK,
+  textSecondary: SUB,
+  textMuted: MUTED,
+  brandFrom: INK,
+  brandTo: '#3A3A36',
+  systemBg: '#F2F2EE',
+  systemBorder: INK + '3D',
+  surfaceAlt: '#F2F2EE',
   success: '#17B26A',
 }
 
@@ -88,13 +93,18 @@ export default function GeofencingView() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: C.bgApp }}>
+    <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
+      <style>{`
+        .gf-row { transition: box-shadow 150ms ease, border-color 150ms ease; }
+        .gf-row:hover { box-shadow: 0 6px 18px -10px rgba(16,24,40,0.14); border-color: ${INK}33; }
+        .gf-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(26,26,24,0.08); }
+      `}</style>
       <Topbar C={C} />
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
         <Sidebar C={C} activeKey="mdm" />
 
-        <div className="flex-1 px-7 py-7 max-w-2xl">
-          <h1 className="text-[20px] font-semibold mb-1" style={{ color: C.textPrimary }}>Geofencing & Location Tracking</h1>
+        <div className="flex-1 px-7 py-7 max-w-4xl">
+          <h1 className="text-[20px] font-extrabold tracking-tight mb-1" style={{ color: C.textPrimary }}>Geofencing & location tracking</h1>
           <p className="text-[13px] mb-6" style={{ color: C.textSecondary }}>Approximate location per institution, correctable manually</p>
 
           {loading ? (
@@ -106,36 +116,41 @@ export default function GeofencingView() {
               {schools.map((school) => {
                 const loc = locations[school.id]
                 return (
-                  <div key={school.id} className="flex items-center justify-between rounded-2xl px-5 py-4"
+                  <div key={school.id} className="gf-row flex items-center justify-between rounded-2xl px-5 py-4"
                     style={{ background: C.surface, border: `1px solid ${C.border}` }}>
-                    <div className="text-[13.5px] font-semibold" style={{ color: C.textPrimary }}>{school.name}</div>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: C.systemBg }}>
+                        <i className="ti ti-building-community text-[15px]" style={{ color: C.textSecondary }} aria-hidden="true"></i>
+                      </div>
+                      <div className="text-[13.5px] font-semibold truncate" style={{ color: C.textPrimary }}>{school.name}</div>
+                    </div>
 
                     {editingId === school.id ? (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <input autoFocus value={form.city}
                           onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
                           placeholder="City"
-                          className="text-[12px] px-2.5 py-1.5 rounded-lg outline-none w-28"
+                          className="gf-input text-[12px] px-2.5 py-1.5 rounded-lg w-28"
                           style={{ border: `1px solid ${C.systemBorder}` }} />
                         <input value={form.region}
                           onChange={e => setForm(f => ({ ...f, region: e.target.value }))}
                           placeholder="State"
-                          className="text-[12px] px-2.5 py-1.5 rounded-lg outline-none w-24"
+                          className="gf-input text-[12px] px-2.5 py-1.5 rounded-lg w-24"
                           style={{ border: `1px solid ${C.systemBorder}` }} />
                         <button onClick={() => saveEdit(school.id)}
-                          className="w-7 h-7 rounded-full flex items-center justify-center"
+                          className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer border-none"
                           style={{ background: C.success, color: '#fff' }}>
                           <i className="ti ti-check text-[13px]" aria-hidden="true"></i>
                         </button>
                         <button onClick={() => setEditingId(null)}
-                          className="w-7 h-7 rounded-full flex items-center justify-center"
+                          className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer border-none"
                           style={{ background: C.surfaceAlt, color: C.textMuted }}>
                           <i className="ti ti-x text-[13px]" aria-hidden="true"></i>
                         </button>
                       </div>
                     ) : loc ? (
                       <button onClick={() => startEdit(school)}
-                        className="flex items-center gap-1.5 text-[12.5px] px-3 py-1.5 rounded-full"
+                        className="flex items-center gap-1.5 text-[12.5px] px-3 py-1.5 rounded-full cursor-pointer border-none shrink-0 transition-colors"
                         style={{ color: C.textSecondary, background: C.surfaceAlt }}>
                         <i className="ti ti-map-pin text-[12px]" style={{ color: C.textMuted }} aria-hidden="true"></i>
                         {loc.city}{loc.region ? `, ${loc.region}` : ''}
@@ -144,8 +159,8 @@ export default function GeofencingView() {
                       </button>
                     ) : (
                       <button onClick={() => startEdit(school)}
-                        className="flex items-center gap-1.5 text-[12.5px] px-3 py-1.5 rounded-full"
-                        style={{ color: C.textMuted }}>
+                        className="flex items-center gap-1.5 text-[12.5px] px-3 py-1.5 rounded-full cursor-pointer border-none shrink-0"
+                        style={{ color: C.textMuted, background: 'transparent' }}>
                         <i className="ti ti-map-pin-plus text-[12px]" aria-hidden="true"></i> Set location
                       </button>
                     )}

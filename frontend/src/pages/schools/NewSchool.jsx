@@ -2,24 +2,28 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createSchool } from '../../api/schools'
 
+const INK = '#1A1A18'
+const SUB = '#5C5C57'
+const MUTED = '#8A8A85'
+
 const C = {
-  bgApp: '#F6F8FB',
+  bgApp: '#E8E8E3',
   surface: '#FFFFFF',
-  surfaceAlt: '#F8FAFC',
-  border: '#E4E9F2',
-  textPrimary: '#101828',
-  textSecondary: '#667085',
-  textMuted: '#98A2B3',
-  brandFrom: '#3B6FE0',
-  brandTo: '#16B8A6',
-  systemBg: '#EDF3FF',
-  systemBorder: '#D8E6FF',
+  surfaceAlt: '#F2F2EE',
+  border: INK + '1F',
+  textPrimary: INK,
+  textSecondary: SUB,
+  textMuted: MUTED,
+  brandFrom: INK,
+  brandTo: '#3A3A36',
+  systemBg: '#F2F2EE',
+  systemBorder: INK + '3D',
   success: '#17B26A',
   successBg: '#ECFDF5',
   successBorder: '#A7E9C8',
-  danger: '#E4483C',
-  dangerBg: '#FEF1F0',
-  dangerBorder: '#FBD5D2',
+  danger: '#8A2A2A',
+  dangerBg: '#FBEAE9',
+  dangerBorder: '#EFC4C1',
 }
 
 const inputCls = "w-full rounded-xl px-4 py-2.5 text-[13.5px] outline-none transition-colors"
@@ -58,7 +62,7 @@ export default function NewSchool() {
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: C.bgApp }}>
+    <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
       {/* Topbar */}
       <div className="flex items-center gap-4 px-7 py-4" style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
         <button onClick={() => navigate(-1)}
@@ -66,7 +70,7 @@ export default function NewSchool() {
           <i className="ti ti-arrow-left text-sm" aria-hidden="true"></i> Back
         </button>
         <div className="w-px h-5" style={{ background: C.border }} />
-        <div className="text-[14.5px] font-semibold" style={{ color: C.textPrimary }}>New institution deployment</div>
+        <div className="text-[14.5px] font-extrabold uppercase tracking-tight" style={{ color: C.textPrimary }}>New institution deployment</div>
       </div>
 
       <div className="max-w-xl mx-auto py-9 px-6">
@@ -125,7 +129,8 @@ export default function NewSchool() {
                   <div key={key}>
                     <label className={labelCls} style={{ color: C.textSecondary }}>{label}</label>
                     <input value={form[key]} onChange={e => update(key, e.target.value)}
-                      placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+                      placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}
+                      onFocus={e => e.target.style.borderColor = INK} onBlur={e => e.target.style.borderColor = C.border} />
                   </div>
                 ))}
               </div>
@@ -146,20 +151,23 @@ export default function NewSchool() {
                   <div key={key}>
                     <label className={labelCls} style={{ color: C.textSecondary }}>{label}</label>
                     <input value={form[key]} onChange={e => update(key, e.target.value)}
-                      placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+                      placeholder={placeholder} className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}
+                      onFocus={e => e.target.style.borderColor = INK} onBlur={e => e.target.style.borderColor = C.border} />
                   </div>
                 ))}
                 <div>
                   <label className={labelCls} style={{ color: C.textSecondary }}>Nginx port</label>
                   <input type="number" value={form.nginx_port}
                     onChange={e => update('nginx_port', parseInt(e.target.value))} className={inputCls}
-                    style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+                    style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}
+                    onFocus={e => e.target.style.borderColor = INK} onBlur={e => e.target.style.borderColor = C.border} />
                 </div>
                 <div>
                   <label className={labelCls} style={{ color: C.textSecondary }}>HTTPS port</label>
                   <input type="number" value={form.https_port}
                     onChange={e => update('https_port', parseInt(e.target.value))} className={inputCls}
-                    style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+                    style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}
+                    onFocus={e => e.target.style.borderColor = INK} onBlur={e => e.target.style.borderColor = C.border} />
                 </div>
                 <div className="col-span-2">
                   <label className={labelCls} style={{ color: C.textSecondary }}>Sync interval</label>
