@@ -8,12 +8,22 @@ const BG = '#E8E8E3'
 const INK = '#1A1A18'
 const SUB = '#5C5C57'
 
+const DEMO_PASSWORD = 'Demo@123'
+const DEMO_USERS = [
+  { key: 'master',       label: 'Master',       desc: 'Full console access',   email: 'master@isf.com',      icon: 'ti-shield-star' },
+  { key: 'admin',        label: 'Admin',        desc: 'Assign & verify all departments', email: 'admin@isf.com', icon: 'ti-user-cog' },
+  { key: 'requester',    label: 'Requester',    desc: 'Raise & track requests', email: 'requester@isf.com',   icon: 'ti-user' },
+  { key: 'service_desk', label: 'Service Desk', desc: 'Resolve tickets',        email: 'servicedesk@isf.com', icon: 'ti-headset' },
+]
+
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showDemo, setShowDemo] = useState(false)
+  const [demoRole, setDemoRole] = useState('')
   const { setAuth } = useAuthStore()
   const navigate = useNavigate()
 
@@ -22,9 +32,17 @@ export default function Login() {
     try {
       const data = await login(email, password)
       setAuth({ name: data.name, role: data.role, email }, data.access_token)
-      navigate('/home')
+      navigate(['requester', 'service_desk'].includes(data.role) ? '/support' : '/home')
     } catch { setError('Invalid email or password') }
     finally { setLoading(false) }
+  }
+
+  const pickDemo = (u) => {
+    setDemoRole(u.key)
+    setEmail(u.email)
+    setPassword(DEMO_PASSWORD)
+    setShowPassword(false)
+    setError('')
   }
 
   return (
@@ -94,7 +112,59 @@ export default function Login() {
               <p className="text-sm mt-1.5" style={{ color: SUB }}>
                 Welcome back. Enter your credentials to continue.
               </p>
+              <p className="text-[13px] mt-3" style={{ color: SUB }}>
+                For demo login credential:{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowDemo(v => !v)}
+                  className="font-bold underline underline-offset-2 cursor-pointer bg-transparent border-none p-0"
+                  style={{ color: INK }}
+                  aria-expanded={showDemo}
+                >
+                  Click here
+                </button>
+              </p>
             </div>
+
+            {showDemo && (
+              <div className="mb-6 border p-3.5" style={{ borderColor: INK + '1A', background: BG + '80' }}>
+                <p className="text-[12px] font-semibold uppercase tracking-widest mb-2.5" style={{ color: SUB }}>
+                  Select type of login
+                </p>
+                <div className="space-y-2" role="radiogroup" aria-label="Demo login type">
+                  {DEMO_USERS.map((u) => {
+                    const active = demoRole === u.key
+                    return (
+                      <button
+                        key={u.key}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => pickDemo(u)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 border text-left cursor-pointer transition-colors"
+                        style={{
+                          background: active ? INK : '#fff',
+                          borderColor: active ? INK : INK + '26',
+                          color: active ? '#fff' : INK,
+                        }}
+                      >
+                        <i className={`ti ${u.icon} text-[18px] shrink-0`} aria-hidden="true"></i>
+                        <span className="flex-1">
+                          <span className="block text-[13.5px] font-bold leading-tight">{u.label}</span>
+                          <span className="block text-[12px] leading-tight mt-0.5" style={{ color: active ? '#ffffffB3' : SUB }}>
+                            {u.desc}
+                          </span>
+                        </span>
+                        <i className={`ti ${active ? 'ti-circle-check-filled' : 'ti-circle'} text-[17px] shrink-0`} aria-hidden="true"></i>
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="text-[12px] mt-2.5" style={{ color: SUB }}>
+                  Picking a role fills the email and password below. Then press Sign in.
+                </p>
+              </div>
+            )}
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
@@ -104,7 +174,7 @@ export default function Login() {
                 <input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => { setEmail(e.target.value); setDemoRole('') }}
                   placeholder="yash@isf.com"
                   required
                   className="w-full px-3.5 py-2.5 text-sm border outline-none transition-colors"

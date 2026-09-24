@@ -15,6 +15,7 @@ import ReportsView from './pages/mdm/ReportsView'
 import GeofencingView from './pages/mdm/GeofencingView'
 import EnrollmentView from './pages/mdm/EnrollmentView'
 import RemoteManagementView from './pages/mdm/RemoteManagementView'
+import SupportDesk from './pages/support/SupportDesk'
 import InfraPointLanding from './pages/marketing/InfraPointLanding'
 import useAuthStore from './store/authStore'
 
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/support" element={<ProtectedRoute><SupportDesk /></ProtectedRoute>} />
         <Route path="/mdm" element={<ProtectedRoute><MdmHub /></ProtectedRoute>} />
         <Route path="/mdm/groups-roles" element={<ProtectedRoute><GroupsRoles /></ProtectedRoute>} />
         <Route path="/mdm/reports" element={<ProtectedRoute><ReportsView /></ProtectedRoute>} />

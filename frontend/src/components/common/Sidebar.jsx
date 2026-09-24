@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom'
+import useAuthStore from '../../store/authStore'
 
 /* Uses the same `C` design tokens as Dashboard.jsx — pass them in as a prop
    so this stays a single source of truth instead of duplicating the object. */
 export default function Sidebar({ C, activeKey = 'mdm' }) {
   const navigate = useNavigate()
+  const auth = useAuthStore()
+  const role = auth.user?.role ?? auth.role
 
   const modules = [
     { key: 'drm', label: 'Digital Rights Management', icon: 'ti-shield-lock', path: '/modules/drm' },
@@ -11,6 +14,11 @@ export default function Sidebar({ C, activeKey = 'mdm' }) {
     { key: 'vapt', label: 'VAPT', icon: 'ti-bug', path: '/modules/vapt' },
     { key: 'fortimates', label: 'FortiMates', icon: 'ti-coin', path: '/modules/fortimates' },
   ]
+
+  // Service Desk entry: requester, service desk staff, admin (head) and master
+  if (['requester', 'service_desk', 'admin', 'master'].includes(role)) {
+    modules.push({ key: 'support', label: 'Support', icon: 'ti-headset', path: '/support' })
+  }
 
   return (
     <div className="w-64 shrink-0 min-h-full py-6 px-3" style={{ background: C.surface, borderRight: `1px solid ${C.border}` }}>
