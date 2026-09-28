@@ -3,10 +3,16 @@ import useAuthStore from '../../store/authStore'
 
 /* Uses the same `C` design tokens as Dashboard.jsx — pass them in as a prop
    so this stays a single source of truth instead of duplicating the object. */
+
+// License Management is visible ONLY to this specific login — not a role,
+// just Yash's own account. Change this if his real email is different.
+const LICENSE_MANAGER_EMAIL = 'yash@isf.com'
+
 export default function Sidebar({ C, activeKey = 'mdm' }) {
   const navigate = useNavigate()
   const auth = useAuthStore()
   const role = auth.user?.role ?? auth.role
+  const email = (auth.user?.email ?? auth.email ?? '').toLowerCase()
 
   const modules = [
     { key: 'drm', label: 'Digital Rights Management', icon: 'ti-shield-lock', path: '/modules/drm' },
@@ -18,6 +24,12 @@ export default function Sidebar({ C, activeKey = 'mdm' }) {
   // Service Desk entry: requester, service desk staff, admin (head) and master
   if (['requester', 'service_desk', 'admin', 'master'].includes(role)) {
     modules.push({ key: 'support', label: 'Support', icon: 'ti-headset', path: '/support' })
+  }
+
+  // License Management: Yash's login only — every other login, including
+  // other "master" demo logins, never sees this entry.
+  if (email === LICENSE_MANAGER_EMAIL) {
+    modules.push({ key: 'license', label: 'License Management', icon: 'ti-key', path: '/license' })
   }
 
   return (
