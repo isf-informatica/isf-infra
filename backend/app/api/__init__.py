@@ -1,0 +1,1 @@
+from app.api import auth_controller, school_controller, command_controller, status_controller
