@@ -1,0 +1,77 @@
+/* FortiMates module styles — scoped under .fm-root so nothing leaks into EasyReach.
+   (Original: fortimates-react/src/styles/globals.css — global body/html rules removed.) */
+/* Fonts (Space Grotesk + Inter) are loaded by FortiMatesApp.jsx on mount. */
+
+.fm-root {
+  color-scheme: dark;
+  min-height: 100vh;
+  background: #050b18;
+  color: #f4f7fc;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fm-root h1, .fm-root h2, .fm-root h3, .fm-root h4 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.fm-root * {
+  scrollbar-width: thin;
+  scrollbar-color: #1c3f80 #050b18;
+}
+.fm-root ::-webkit-scrollbar { width: 10px; }
+.fm-root ::-webkit-scrollbar-track { background: #050b18; }
+.fm-root ::-webkit-scrollbar-thumb { background: #1c3f80; border-radius: 8px; }
+
+.fm-root ::selection {
+  background: #f5ae0e;
+  color: #050b18;
+}
+
+/* Shield facet clip-paths (brand shape) */
+.fm-root .clip-shield { clip-path: polygon(50% 0%, 100% 20%, 100% 62%, 50% 100%, 0% 62%, 0% 20%); }
+.fm-root .clip-facet { clip-path: polygon(0 0, 100% 0, 100% 88%, 92% 100%, 0 100%); }
+.fm-root .clip-facet-r { clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 0 12%); }
+.fm-root .clip-envelope { clip-path: polygon(6% 0, 94% 0, 100% 22%, 100% 100%, 0 100%, 0 22%); }
+.fm-root .clip-none { clip-path: none !important; }
+
+.fm-root .text-gradient-signal {
+  background: linear-gradient(120deg, #4fd6e8, #f5ae0e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.fm-root .grid-overlay {
+  background-image:
+    linear-gradient(rgba(79, 214, 232, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 214, 232, 0.06) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+.fm-root .twinkle { animation: fmTwinkle 3.4s ease-in-out infinite; }
+@keyframes fmTwinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.6); }
+}
+
+.fm-root .panel-glow { animation: fmPanelGlow 4.5s ease-in-out infinite; }
+@keyframes fmPanelGlow {
+  0%, 100% { box-shadow: 0 0 40px rgba(79, 214, 232, 0.12), 0 0 0 1px rgba(255,255,255,0.08); }
+  50% { box-shadow: 0 0 80px rgba(79, 214, 232, 0.3), 0 0 0 1px rgba(255,255,255,0.14); }
+}
+
+.fm-root .bounce-slow { animation: fmBounceSlow 2.2s ease-in-out infinite; }
+@keyframes fmBounceSlow {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fm-root *, .fm-root *::before, .fm-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

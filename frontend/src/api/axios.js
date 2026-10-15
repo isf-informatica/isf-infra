@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://dolphin-app-33jp4.ondigitalocean.app',
+  baseURL: 'http://localhost:8000',
+  // baseURL: 'https://dolphin-app-33jp4.ondigitalocean.app',
   headers: {
     'Content-Type': 'application/json',
   },
