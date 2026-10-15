@@ -66,8 +66,8 @@ const CATEGORIES = [
     icon: 'ti-apps',
     accent: '#F79420',
     gradient: 'linear-gradient(135deg, #F79420, #F7B733)',
-    path: null,
-    features: [],
+    path: '/mdm/app-management',
+    features: ['App inventory', 'Blacklist / Whitelist apps', 'Push custom apps (APK / EXE)', 'App pre-configuration', 'Usage reports & export'],
   },
   {
     key: 'policy-management',
