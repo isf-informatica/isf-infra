@@ -46,8 +46,8 @@ const CATEGORIES = [
     key: 'enrollment',
     title: 'Device Enrollment & Provisioning',
     icon: 'ti-plug-connected',
-    accent: '#3B6FE0',
-    gradient: 'linear-gradient(135deg, #3B6FE0, #16B8A6)',
+    accent: '#2563EB',
+    gradient: 'linear-gradient(135deg, #2563EB, #60A5FA)',
     path: '/mdm/enrollment',
     features: ['Add device', 'List devices', 'Delete device', 'Agent installer ZIP generator'],
   },
@@ -55,8 +55,8 @@ const CATEGORIES = [
     key: 'remote-management',
     title: 'Remote Device Management',
     icon: 'ti-device-desktop-analytics',
-    accent: '#7C5CFC',
-    gradient: 'linear-gradient(135deg, #7C5CFC, #A78BFA)',
+    accent: '#0891B2',
+    gradient: 'linear-gradient(135deg, #0891B2, #22D3EE)',
     path: '/mdm/remote-management',
     features: ['Network info', 'Disk info', 'Process list', 'Restart / Shutdown', 'Lock device', 'Run script'],
   },
@@ -82,8 +82,8 @@ const CATEGORIES = [
     key: 'groups-roles',
     title: 'Group & Role-Based Management',
     icon: 'ti-users-group',
-    accent: '#E4483C',
-    gradient: 'linear-gradient(135deg, #E4483C, #F5766D)',
+    accent: '#DB2777',
+    gradient: 'linear-gradient(135deg, #DB2777, #F472B6)',
     path: '/mdm/groups-roles',
     features: ['Role assignment (UI preview)', 'Device grouping (UI preview)'],
   },
@@ -100,8 +100,8 @@ const CATEGORIES = [
     key: 'geofencing',
     title: 'Geofencing & Location Tracking',
     icon: 'ti-map-pin',
-    accent: '#16B8A6',
-    gradient: 'linear-gradient(135deg, #16B8A6, #3B6FE0)',
+    accent: '#65A30D',
+    gradient: 'linear-gradient(135deg, #4D7C0F, #84CC16)',
     path: '/mdm/geofencing',
     features: ['IP-based location (approximate)', 'Manual location correction'],
   },
@@ -109,8 +109,8 @@ const CATEGORIES = [
     key: 'content-publishing',
     title: 'Content Publishing',
     icon: 'ti-upload',
-    accent: '#A78BFA',
-    gradient: 'linear-gradient(135deg, #A78BFA, #7C5CFC)',
+    accent: '#7C5CFC',
+    gradient: 'linear-gradient(135deg, #7C5CFC, #A78BFA)',
     path: '/mdm/content-publishing',
     features: ['PDF / video / document library', 'Publish to institutions', 'Offline delivery & open tracking', 'Boot logo & wallpaper'],
   },
@@ -118,8 +118,8 @@ const CATEGORIES = [
     key: 'secure-browser',
     title: 'Secure Browser',
     icon: 'ti-world',
-    accent: '#F5766D',
-    gradient: 'linear-gradient(135deg, #F5766D, #E4483C)',
+    accent: '#DC2626',
+    gradient: 'linear-gradient(135deg, #DC2626, #F87171)',
     path: '/mdm/secure-browser',
     features: ['Category web filter', 'Allow / block lists & keywords', 'SafeSearch & kiosk mode', 'Live block activity log'],
   },
@@ -127,8 +127,8 @@ const CATEGORIES = [
     key: 'reports',
     title: 'Real-Time Reports & Identity',
     icon: 'ti-chart-bar',
-    accent: '#17B26A',
-    gradient: 'linear-gradient(135deg, #6EE7B7, #17B26A)',
+    accent: '#CA8A04',
+    gradient: 'linear-gradient(135deg, #B7791F, #EAB308)',
     path: '/mdm/reports',
     features: ['Total institutions count', 'Active / Pending / Killed counts'],
   },
@@ -222,9 +222,9 @@ export default function MdmHub() {
                       borderTop: `1px solid ${built ? 'rgba(255,255,255,0.6)' : GLASS.cardBorderSoon}`,
                     }}>
                     <div className="flex items-start justify-between gap-2 mb-3.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {built && <span className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: cat.accent }} />}
-                        <div className="text-[14.5px] font-semibold truncate" style={{ color: C.textPrimary }}>{cat.title}</div>
+                      <div className="flex items-start gap-2 min-w-0">
+                        {built && <span className="shrink-0 w-1.5 h-1.5 rounded-full mt-[7px]" style={{ background: cat.accent }} />}
+                        <div className="text-[14.5px] font-semibold leading-snug" style={{ color: C.textPrimary }}>{cat.title}</div>
                       </div>
                       {!built && (
                         <span className="shrink-0 text-[9.5px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
