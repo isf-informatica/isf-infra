@@ -75,7 +75,7 @@ export default function DrmView() {
 function OverviewTab({ summary, goTo }) {
   if (!summary) return <Loader label="Connecting to license server…" />
   const pipeline = [
-    { icon: 'ti-file-lock', title: 'Encrypted storage', text: 'AES-encrypted files & HLS segments' },
+    { icon: 'ti-cloud-lock', title: 'Encrypted storage', text: 'AES-encrypted files & HLS segments' },
     { icon: 'ti-key', title: 'License server', text: 'Checks user, device, time & place' },
     { icon: 'ti-clock-shield', title: 'Short-lived key', text: 'Device-bound key, auto-expires' },
     { icon: 'ti-eye-check', title: 'Watermarked view', text: 'User ID + time on every screen' },
@@ -280,7 +280,7 @@ function ProtectWizard({ policies, onClose, onDone }) {
               className="rounded-2xl py-10 px-6 flex flex-col items-center text-center cursor-pointer"
               style={{ border: `2px dashed ${drag ? ACCENT : C.borderStrong}`, background: drag ? THEME.accentBg : C.surfaceAlt }}>
               <span className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3" style={{ background: THEME.accentBg, border: `1px solid ${THEME.accentBorder}` }}>
-                <i className="ti ti-file-lock text-[22px]" style={{ color: ACCENT }} aria-hidden="true"></i>
+                <i className="ti ti-cloud-lock text-[22px]" style={{ color: ACCENT }} aria-hidden="true"></i>
               </span>
               <div className="text-[13.5px] font-semibold" style={{ color: C.textPrimary }}>Drop the original file here or click to browse</div>
               <div className="text-[11.5px] mt-1" style={{ color: C.textMuted }}>MP4 video · PDF · EPUB · Word — encrypted on the server, original never leaves it</div>
