@@ -1,8 +1,13 @@
 import axios from 'axios'
 
+// Default = live backend, so login works for everyone after a fresh pull.
+// To use a local backend, create frontend/.env.local (git-ignored) with:
+//   VITE_API_URL=http://localhost:8000
+// then restart `npm run dev`.
+const LIVE_API_URL = 'https://dolphin-app-33jp4.ondigitalocean.app'
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
-  // baseURL: 'https://dolphin-app-33jp4.ondigitalocean.app',
+  baseURL: import.meta.env.VITE_API_URL || LIVE_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
