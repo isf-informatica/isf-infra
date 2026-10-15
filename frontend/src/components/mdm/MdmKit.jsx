@@ -373,7 +373,7 @@ function ToastStack({ toasts }) {
 
 /* ───────── page shell ───────── */
 
-export function MdmPage({ accent, accentDeep, accentBg, accentBorder, gradient, icon, title, subtitle, tabs, tab, onTab, badges = {}, status, right, toasts, children }) {
+export function MdmPage({ accent, accentDeep, accentBg, accentBorder, gradient, icon, title, subtitle, tabs, tab, onTab, badges = {}, status, right, toasts, children, activeKey = 'mdm', backPath = '/mdm', backLabel = 'MDM software' }) {
   const navigate = useNavigate()
   return (
     <AccentCtx.Provider value={{ accent, accentDeep, accentBg, accentBorder }}>
@@ -398,11 +398,11 @@ export function MdmPage({ accent, accentDeep, accentBg, accentBorder, gradient, 
         <Topbar C={C} />
 
         <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-          <Sidebar C={C} activeKey="mdm" />
+          <Sidebar C={C} activeKey={activeKey} />
 
           <div className="flex-1 min-w-0 px-7 py-7">
-            <button onClick={() => navigate('/mdm')} className="flex items-center gap-1 text-[12px] font-medium mb-3 cursor-pointer" style={{ color: C.textMuted, background: 'transparent', border: 'none' }}>
-              <i className="ti ti-arrow-left text-[12px]" aria-hidden="true"></i> MDM software
+            <button onClick={() => navigate(backPath)} className="flex items-center gap-1 text-[12px] font-medium mb-3 cursor-pointer" style={{ color: C.textMuted, background: 'transparent', border: 'none' }}>
+              <i className="ti ti-arrow-left text-[12px]" aria-hidden="true"></i> {backLabel}
             </button>
 
             <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
