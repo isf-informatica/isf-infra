@@ -75,7 +75,7 @@ export default function DrmView() {
 function OverviewTab({ summary, goTo }) {
   if (!summary) return <Loader label="Connecting to license server…" />
   const pipeline = [
-    { icon: 'ti-database-lock', title: 'Encrypted storage', text: 'AES-encrypted files & HLS segments' },
+    { icon: 'ti-file-lock', title: 'Encrypted storage', text: 'AES-encrypted files & HLS segments' },
     { icon: 'ti-key', title: 'License server', text: 'Checks user, device, time & place' },
     { icon: 'ti-clock-shield', title: 'Short-lived key', text: 'Device-bound key, auto-expires' },
     { icon: 'ti-eye-check', title: 'Watermarked view', text: 'User ID + time on every screen' },
