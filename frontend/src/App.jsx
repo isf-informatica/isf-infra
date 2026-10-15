@@ -21,6 +21,7 @@ import PolicyManagementView from './pages/mdm/PolicyManagementView'
 import ContentPublishingView from './pages/mdm/ContentPublishingView'
 import SecureBrowserView from './pages/mdm/SecureBrowserView'
 import DrmView from './pages/drm/DrmView'
+import VaptView from './pages/vapt/VaptView'
 import SupportDesk from './pages/support/SupportDesk'
 import InfraPointLanding from './pages/marketing/InfraPointLanding'
 import useAuthStore from './store/authStore'
@@ -63,7 +64,7 @@ export default function App() {
         <Route path="/mdm/content-publishing" element={<ProtectedRoute><ContentPublishingView /></ProtectedRoute>} />
         <Route path="/mdm/secure-browser" element={<ProtectedRoute><SecureBrowserView /></ProtectedRoute>} />
         <Route path="/modules/drm" element={<ProtectedRoute><DrmView /></ProtectedRoute>} />
-        <Route path="/modules/vapt" element={<ProtectedRoute><ComingSoon title="VAPT" moduleKey="vapt" /></ProtectedRoute>} />
+        <Route path="/modules/vapt" element={<ProtectedRoute><VaptView /></ProtectedRoute>} />
         {/* FortiMates: ComingSoon replaced by the real FortiMates module.
             "/*" lets its inner pages work: /modules/fortimates/dashboard, /login, etc. */}
         <Route
