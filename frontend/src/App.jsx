@@ -15,6 +15,7 @@ import ReportsView from './pages/mdm/ReportsView'
 import GeofencingView from './pages/mdm/GeofencingView'
 import EnrollmentView from './pages/mdm/EnrollmentView'
 import RemoteManagementView from './pages/mdm/RemoteManagementView'
+import AppManagementView from './pages/mdm/AppManagementView'
 import SupportDesk from './pages/support/SupportDesk'
 import InfraPointLanding from './pages/marketing/InfraPointLanding'
 import useAuthStore from './store/authStore'
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/mdm/geofencing" element={<ProtectedRoute><GeofencingView /></ProtectedRoute>} />
         <Route path="/mdm/enrollment" element={<ProtectedRoute><EnrollmentView /></ProtectedRoute>} />
         <Route path="/mdm/remote-management" element={<ProtectedRoute><RemoteManagementView /></ProtectedRoute>} />
+        <Route path="/mdm/app-management" element={<ProtectedRoute><AppManagementView /></ProtectedRoute>} />
         <Route path="/modules/drm" element={<ProtectedRoute><ComingSoon title="Digital Rights Management" moduleKey="drm" /></ProtectedRoute>} />
         <Route path="/modules/vapt" element={<ProtectedRoute><ComingSoon title="VAPT" moduleKey="vapt" /></ProtectedRoute>} />
         <Route path="/modules/fortimates" element={<ProtectedRoute><ComingSoon title="FortiMates" moduleKey="fortimates" /></ProtectedRoute>} />
