@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/auth/Login'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -27,6 +28,10 @@ import LicenseAssignView from './pages/license/Licenseassignview'
 import LicenseUsageView from './pages/license/Licenseusageview'
 import LicenseViolationsView from './pages/license/Licenseviolationsview'
 
+// FortiMates module (pages/fortimates) — lazy-loaded so its heavy bundle
+// (charts, icons, animations) only downloads when the FortiMates page is opened.
+const FortiMatesApp = lazy(() => import('./pages/fortimates/FortiMatesApp.jsx'))
+
 function ProtectedRoute({ children }) {
   const { token } = useAuthStore()
   return token ? children : <Navigate to="/login" />
@@ -52,7 +57,18 @@ export default function App() {
         <Route path="/mdm/app-management" element={<ProtectedRoute><AppManagementView /></ProtectedRoute>} />
         <Route path="/modules/drm" element={<ProtectedRoute><ComingSoon title="Digital Rights Management" moduleKey="drm" /></ProtectedRoute>} />
         <Route path="/modules/vapt" element={<ProtectedRoute><ComingSoon title="VAPT" moduleKey="vapt" /></ProtectedRoute>} />
-        <Route path="/modules/fortimates" element={<ProtectedRoute><ComingSoon title="FortiMates" moduleKey="fortimates" /></ProtectedRoute>} />
+        {/* FortiMates: ComingSoon replaced by the real FortiMates module.
+            "/*" lets its inner pages work: /modules/fortimates/dashboard, /login, etc. */}
+        <Route
+          path="/modules/fortimates/*"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={null}>
+                <FortiMatesApp />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/schools/new" element={<ProtectedRoute><NewSchool /></ProtectedRoute>} />
