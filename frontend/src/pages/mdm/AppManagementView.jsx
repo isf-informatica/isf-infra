@@ -785,6 +785,8 @@ function DeployTab({ toast, institutions, onChange }) {
   const [deps, setDeps] = useState(null)
   const [wizard, setWizard] = useState(false)
   const [retrying, setRetrying] = useState(null)
+  const depsRef = useRef(null)
+  useEffect(() => { depsRef.current = deps }, [deps])
 
   const load = useCallback(() => getDeployments().then(setDeps), [])
   useEffect(() => { load() }, [load])
@@ -794,16 +796,15 @@ function DeployTab({ toast, institutions, onChange }) {
     if (!anyRunning) return
     const t = setInterval(async () => {
       const next = await getDeployments()
-      setDeps(prev => {
-        next.forEach(n => {
-          const p = prev?.find(x => x.id === n.id)
-          if (p && p.status === 'running' && n.status === 'completed') {
-            toast(`${n.app} ${n.version} installed on ${n.installed}/${n.total} devices`)
-            onChange()
-          }
-        })
-        return next
+      next.forEach(n => {
+        const p = depsRef.current?.find(x => x.id === n.id)
+        if (p && p.status === 'running' && n.status === 'completed') {
+          toast(`${n.app} ${n.version} installed on ${n.installed}/${n.total} devices`)
+          onChange()
+        }
       })
+      depsRef.current = next
+      setDeps(next)
     }, 1600)
     return () => clearInterval(t)
   }, [anyRunning, toast, onChange])

@@ -75,8 +75,8 @@ const CATEGORIES = [
     icon: 'ti-shield-check',
     accent: '#17B26A',
     gradient: 'linear-gradient(135deg, #17B26A, #6EE7B7)',
-    path: null,
-    features: [],
+    path: '/mdm/policy-management',
+    features: ['Security policy profiles', 'Hardware restrictions', 'Wi-Fi & time fencing', 'Push & compliance tracking', 'Audit log'],
   },
   {
     key: 'groups-roles',
@@ -111,8 +111,8 @@ const CATEGORIES = [
     icon: 'ti-upload',
     accent: '#A78BFA',
     gradient: 'linear-gradient(135deg, #A78BFA, #7C5CFC)',
-    path: null,
-    features: [],
+    path: '/mdm/content-publishing',
+    features: ['PDF / video / document library', 'Publish to institutions', 'Offline delivery & open tracking', 'Boot logo & wallpaper'],
   },
   {
     key: 'secure-browser',
@@ -120,8 +120,8 @@ const CATEGORIES = [
     icon: 'ti-world',
     accent: '#F5766D',
     gradient: 'linear-gradient(135deg, #F5766D, #E4483C)',
-    path: null,
-    features: [],
+    path: '/mdm/secure-browser',
+    features: ['Category web filter', 'Allow / block lists & keywords', 'SafeSearch & kiosk mode', 'Live block activity log'],
   },
   {
     key: 'reports',

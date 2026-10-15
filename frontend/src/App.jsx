@@ -17,6 +17,9 @@ import GeofencingView from './pages/mdm/GeofencingView'
 import EnrollmentView from './pages/mdm/EnrollmentView'
 import RemoteManagementView from './pages/mdm/RemoteManagementView'
 import AppManagementView from './pages/mdm/AppManagementView'
+import PolicyManagementView from './pages/mdm/PolicyManagementView'
+import ContentPublishingView from './pages/mdm/ContentPublishingView'
+import SecureBrowserView from './pages/mdm/SecureBrowserView'
 import SupportDesk from './pages/support/SupportDesk'
 import InfraPointLanding from './pages/marketing/InfraPointLanding'
 import useAuthStore from './store/authStore'
@@ -55,6 +58,9 @@ export default function App() {
         <Route path="/mdm/enrollment" element={<ProtectedRoute><EnrollmentView /></ProtectedRoute>} />
         <Route path="/mdm/remote-management" element={<ProtectedRoute><RemoteManagementView /></ProtectedRoute>} />
         <Route path="/mdm/app-management" element={<ProtectedRoute><AppManagementView /></ProtectedRoute>} />
+        <Route path="/mdm/policy-management" element={<ProtectedRoute><PolicyManagementView /></ProtectedRoute>} />
+        <Route path="/mdm/content-publishing" element={<ProtectedRoute><ContentPublishingView /></ProtectedRoute>} />
+        <Route path="/mdm/secure-browser" element={<ProtectedRoute><SecureBrowserView /></ProtectedRoute>} />
         <Route path="/modules/drm" element={<ProtectedRoute><ComingSoon title="Digital Rights Management" moduleKey="drm" /></ProtectedRoute>} />
         <Route path="/modules/vapt" element={<ProtectedRoute><ComingSoon title="VAPT" moduleKey="vapt" /></ProtectedRoute>} />
         {/* FortiMates: ComingSoon replaced by the real FortiMates module.
