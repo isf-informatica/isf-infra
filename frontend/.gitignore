@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# FortiMates module ships its own lib/ (demo stubs) — keep it tracked
+!src/pages/fortimates/lib/
+!src/pages/fortimates/lib/*
