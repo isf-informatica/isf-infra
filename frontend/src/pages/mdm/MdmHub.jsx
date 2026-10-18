@@ -26,17 +26,6 @@ const C = {
   warningBorder: '#E7D39C',
 }
 
-// Glass-card treatment tokens — additive only, no change to C.bgApp or C.surface
-// so the rest of the app shell is untouched.
-const GLASS = {
-  cardBg: 'rgba(255,255,255,0.62)',
-  cardBgSoon: 'rgba(255,255,255,0.42)',
-  cardBorder: 'rgba(255,255,255,0.85)',
-  cardBorderSoon: 'rgba(26,26,24,0.08)',
-  shadow: '0 1px 1px rgba(26,26,24,0.04), 0 16px 32px -18px rgba(26,26,24,0.22)',
-  shadowHover: '0 1px 1px rgba(26,26,24,0.05), 0 28px 48px -18px rgba(26,26,24,0.30)',
-}
-
 // `features` lists ONLY the sub-capabilities that actually exist today —
 // nothing planned or missing is mentioned inside the card. A category with
 // an empty features list is fully "planned" (nothing built yet).
@@ -156,117 +145,71 @@ export default function MdmHub() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full">
             {CATEGORIES.map((cat) => {
               const built = cat.features.length > 0
 
               return (
                 <div key={cat.key}
-                  className="group rounded-[26px] overflow-hidden flex flex-col transition-all duration-300 ease-out"
-                  style={{
-                    background: built ? GLASS.cardBg : GLASS.cardBgSoon,
-                    border: `1px solid ${built ? cat.accent + '40' : GLASS.cardBorderSoon}`,
-                    boxShadow: GLASS.shadow,
-                    backdropFilter: 'blur(18px)',
-                    WebkitBackdropFilter: 'blur(18px)',
-                    transform: 'translateY(0)',
-                  }}
+                  className="group rounded-2xl flex flex-col p-5 transition-all duration-300 ease-out"
+                  style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 1px 1px rgba(26,26,24,0.03)' }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.boxShadow = built ? `0 1px 1px rgba(26,26,24,0.05), 0 30px 50px -16px ${cat.accent}55` : GLASS.shadowHover
-                    e.currentTarget.style.transform = 'translateY(-5px)'
-                    e.currentTarget.style.borderColor = built ? cat.accent + '80' : 'rgba(26,26,24,0.14)'
+                    if (!built) return
+                    e.currentTarget.style.boxShadow = '0 1px 1px rgba(26,26,24,0.04), 0 18px 34px -24px rgba(26,26,24,0.4)'
+                    e.currentTarget.style.transform = 'translateY(-3px)'
+                    e.currentTarget.style.borderColor = C.borderStrong
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.boxShadow = GLASS.shadow
+                    e.currentTarget.style.boxShadow = '0 1px 1px rgba(26,26,24,0.03)'
                     e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.borderColor = built ? cat.accent + '40' : GLASS.cardBorderSoon
+                    e.currentTarget.style.borderColor = C.border
                   }}>
 
-                  {/* Glass header */}
-                  <div className="h-32 flex items-center justify-center relative overflow-hidden"
-                    style={{ background: built ? cat.gradient : 'transparent' }}>
-
-                    {built ? (
-                      <>
-                        <div className="pointer-events-none absolute -inset-x-4 -top-10 h-24 rotate-[-8deg]"
-                          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0))' }} />
-                        <div className="pointer-events-none absolute inset-0 opacity-[0.5]"
-                          style={{ backgroundImage: `radial-gradient(#FFFFFF20 1px, transparent 1px)`, backgroundSize: '18px 18px' }} />
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
-                          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.35))' }} />
-                      </>
-                    ) : (
-                      <>
-                        <div className="pointer-events-none absolute inset-0 opacity-40"
-                          style={{ backgroundImage: `radial-gradient(${INK}12 1px, transparent 1px)`, backgroundSize: '16px 16px' }} />
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px"
-                          style={{ background: `linear-gradient(90deg, transparent, ${INK}14, transparent)` }} />
-                      </>
-                    )}
-
-                    <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
-                      style={
-                        built
-                          ? { background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', boxShadow: '0 8px 20px -8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.5)' }
-                          : { background: cat.accent + '14', border: `1px dashed ${cat.accent}50`, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }
-                      }>
-                      <i className={`ti ${cat.icon} text-[26px]`} style={{ color: built ? '#fff' : cat.accent + 'B0' }} aria-hidden="true"></i>
+                  {/* Icon + badge */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ background: cat.accent + '14', border: `1px solid ${cat.accent}29` }}>
+                      <i className={`ti ${cat.icon} text-[22px]`} style={{ color: cat.accent }} aria-hidden="true"></i>
                     </div>
+                    {built ? (
+                      <span className="shrink-0 text-[9.5px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ color: C.textSecondary, background: C.surfaceAlt, border: `1px solid ${C.border}` }}>
+                        {cat.features.length}
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-[9.5px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                        style={{ color: C.textMuted, background: C.surfaceAlt, border: `1px solid ${C.border}` }}>Soon</span>
+                    )}
                   </div>
 
-                  <div className="p-6 flex flex-col flex-1 relative"
-                    style={{
-                      background: built ? 'rgba(255,255,255,0.35)' : 'transparent',
-                      borderTop: `1px solid ${built ? 'rgba(255,255,255,0.6)' : GLASS.cardBorderSoon}`,
-                    }}>
-                    <div className="flex items-start justify-between gap-2 mb-3.5">
-                      <div className="flex items-start gap-2 min-w-0">
-                        {built && <span className="shrink-0 w-1.5 h-1.5 rounded-full mt-[7px]" style={{ background: cat.accent }} />}
-                        <div className="text-[14.5px] font-semibold leading-snug" style={{ color: C.textPrimary }}>{cat.title}</div>
-                      </div>
-                      {!built && (
-                        <span className="shrink-0 text-[9.5px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                          style={{ color: C.textMuted, background: 'rgba(255,255,255,0.6)', border: `1px solid ${C.border}`, backdropFilter: 'blur(6px)' }}>
-                          Soon
-                        </span>
-                      )}
-                      {built && (
-                        <span className="shrink-0 text-[9.5px] font-bold px-2 py-0.5 rounded-full"
-                          style={{ color: cat.accent, background: cat.accent + '14', border: `1px solid ${cat.accent}30` }}>
-                          {cat.features.length}
-                        </span>
-                      )}
-                    </div>
+                  <div className="text-[14.5px] font-semibold leading-snug mb-3.5" style={{ color: C.textPrimary }}>{cat.title}</div>
 
-                    {built ? (
-                      <ul className="flex flex-col gap-1 mb-4 flex-1">
-                        {cat.features.map((f) => (
-                          <li key={f} className="flex items-center gap-1.5 text-[11.5px] font-medium px-2 py-[5px] rounded-lg transition-colors duration-200"
-                            style={{ color: C.textPrimary, background: cat.accent + '0D' }}>
-                            <i className="ti ti-check text-[11px] shrink-0" style={{ color: cat.accent }} aria-hidden="true"></i>
-                            <span className="truncate">{f}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[12px] mb-4 flex-1" style={{ color: C.textMuted }}>Not built yet.</p>
-                    )}
+                  {built ? (
+                    <ul className="flex flex-col gap-1 mb-5 flex-1">
+                      {cat.features.map((f) => (
+                        <li key={f} className="flex items-center gap-1.5 text-[11.5px] font-medium"
+                          style={{ color: C.textSecondary }}>
+                          <i className="ti ti-check text-[11px] shrink-0" style={{ color: cat.accent }} aria-hidden="true"></i>
+                          <span className="truncate">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[12px] mb-5 flex-1" style={{ color: C.textMuted }}>Not built yet.</p>
+                  )}
 
-                    <button
-                      onClick={() => built && navigate(cat.path)}
-                      disabled={!built}
-                      className="w-full py-2.5 rounded-xl text-[12.5px] font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 transition-all duration-200"
-                      style={
-                        built
-                          ? { background: cat.gradient, color: '#fff', border: 'none', cursor: 'pointer', boxShadow: `0 10px 20px -10px ${cat.accent}88` }
-                          : { background: 'rgba(255,255,255,0.5)', color: cat.accent, border: `1px solid ${cat.accent}40`, cursor: 'not-allowed', backdropFilter: 'blur(6px)' }
-                      }
-                      onMouseEnter={e => { if (built) { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
-                      onMouseLeave={e => { if (built) { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)' } }}>
-                      {built ? 'View' : <><i className="ti ti-clock text-[12px]" aria-hidden="true"></i> Coming soon</>}
-                      {built && <i className="ti ti-arrow-right text-[13px]" aria-hidden="true"></i>}
+                  {built ? (
+                    <button onClick={() => navigate(cat.path)}
+                      className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold cursor-pointer bg-transparent border-none p-0"
+                      style={{ color: C.textPrimary }}>
+                      View
+                      <i className="ti ti-arrow-right text-[13px] transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: cat.accent }} aria-hidden="true"></i>
                     </button>
-                  </div>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: C.textMuted }}>
+                      <i className="ti ti-clock text-[12px]" aria-hidden="true"></i> Coming soon
+                    </span>
+                  )}
                 </div>
               )
             })}

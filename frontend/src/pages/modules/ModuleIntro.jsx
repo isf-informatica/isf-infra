@@ -26,16 +26,15 @@ export default function ModuleIntro() {
           </button>
 
           {/* Hero */}
-          <div className="rounded-[22px] overflow-hidden" style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 1px 1px rgba(26,26,24,0.04), 0 16px 34px -22px rgba(26,26,24,0.3)' }}>
-            <div className="h-36 relative flex items-center px-7 gap-5" style={{ background: mod.gradient }}>
-              <div className="pointer-events-none absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(#FFFFFF22 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
-              <div className="relative w-20 h-20 rounded-2xl flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(255,255,255,0.5)', backdropFilter: 'blur(8px)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.5), 0 10px 22px -8px rgba(0,0,0,0.3)' }}>
-                <i className={`ti ${mod.icon} text-[36px] text-white`} aria-hidden="true"></i>
+          <div className="rounded-2xl overflow-hidden" style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 1px 1px rgba(26,26,24,0.04)' }}>
+            <div className="flex items-center px-7 py-7 gap-5" style={{ background: mod.bg, borderBottom: `1px solid ${mod.border}` }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
+                style={{ background: mod.accent + '14', border: `1px solid ${mod.accent}2e` }}>
+                <i className={`ti ${mod.icon} text-[30px]`} style={{ color: mod.accent }} aria-hidden="true"></i>
               </div>
-              <div className="relative">
-                <h1 className="text-[24px] font-extrabold tracking-tight text-white">{mod.title}</h1>
-                <p className="text-[13.5px] mt-1 text-white/90">{mod.tagline}</p>
+              <div>
+                <h1 className="text-[23px] font-extrabold tracking-tight" style={{ color: C.textPrimary }}>{mod.title}</h1>
+                <p className="text-[13.5px] mt-1" style={{ color: C.textSecondary }}>{mod.tagline}</p>
               </div>
             </div>
 
@@ -72,9 +71,9 @@ export default function ModuleIntro() {
                   ) : (
                   <button onClick={() => navigate(mod.path)}
                     className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-bold uppercase tracking-wide text-white border-none cursor-pointer transition-all"
-                    style={{ background: mod.gradient, boxShadow: `0 10px 22px -10px ${mod.accent}` }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)' }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}>
+                    style={{ background: C.textPrimary }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.filter = 'brightness(1.15)' }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.filter = 'none' }}>
                     Open module <i className="ti ti-arrow-right text-[14px]" aria-hidden="true"></i>
                   </button>
                   )}

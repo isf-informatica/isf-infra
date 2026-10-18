@@ -405,8 +405,8 @@ export function MdmPage({ accent, accentDeep, accentBg, accentBorder, gradient, 
 
             <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: gradient, boxShadow: `0 10px 22px -10px ${accent}` }}>
-                  <i className={`ti ${icon} text-[22px] text-white`} aria-hidden="true"></i>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: accent + '14', border: `1px solid ${accent}2e` }}>
+                  <i className={`ti ${icon} text-[22px]`} style={{ color: accent }} aria-hidden="true"></i>
                 </div>
                 <div>
                   <h1 className="text-[20px] font-extrabold uppercase tracking-tight" style={{ color: C.textPrimary }}>{title}</h1>

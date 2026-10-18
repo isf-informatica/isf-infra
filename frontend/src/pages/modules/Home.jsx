@@ -174,42 +174,39 @@ export default function Home() {
             Choose a module to get started. Each one opens with a quick overview first.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
             {mods.map(m => (
               <button key={m.key} onClick={() => navigate(`/home/${m.key}`)}
-                className="hm-card group text-left rounded-[22px] overflow-hidden flex flex-col cursor-pointer"
-                style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 1px 1px rgba(26,26,24,0.04), 0 14px 30px -20px rgba(26,26,24,0.25)' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = `0 1px 1px rgba(26,26,24,0.05), 0 28px 46px -20px ${m.accent}66`; e.currentTarget.style.borderColor = m.accent + '66' }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 1px rgba(26,26,24,0.04), 0 14px 30px -20px rgba(26,26,24,0.25)'; e.currentTarget.style.borderColor = C.border }}>
+                className="hm-card group text-left rounded-2xl overflow-hidden flex flex-col cursor-pointer p-5"
+                style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 1px 1px rgba(26,26,24,0.03)' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 1px 1px rgba(26,26,24,0.04), 0 18px 34px -24px rgba(26,26,24,0.4)'; e.currentTarget.style.borderColor = C.borderStrong }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 1px rgba(26,26,24,0.03)'; e.currentTarget.style.borderColor = C.border }}>
 
-                {/* Gradient header */}
-                <div className="h-28 relative flex items-center justify-center" style={{ background: m.gradient }}>
-                  <div className="pointer-events-none absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(#FFFFFF22 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-                  {m.soon && (
-                    <span className="absolute top-3 right-3 text-[9.5px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                      style={{ background: 'rgba(255,255,255,0.9)', color: m.deep }}>Soon</span>
-                  )}
-                  <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
-                    style={{ background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(255,255,255,0.5)', backdropFilter: 'blur(8px)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 18px -8px rgba(0,0,0,0.3)' }}>
-                    <i className={`ti ${m.icon} text-[28px] text-white`} aria-hidden="true"></i>
+                {/* Icon + soon badge */}
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: m.accent + '14', border: `1px solid ${m.accent}29` }}>
+                    <i className={`ti ${m.icon} text-[22px]`} style={{ color: m.accent }} aria-hidden="true"></i>
                   </div>
-                </div>
-
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="text-[15px] font-bold" style={{ color: C.textPrimary }}>{m.title}</div>
-                  <div className="text-[12.5px] mt-0.5 mb-4 flex-1" style={{ color: C.textSecondary }}>{m.tagline}</div>
-                  {m.soon ? (
-                    <span className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[12px] font-bold uppercase tracking-wide"
-                      style={{ background: C.surfaceAlt, color: m.deep, border: `1px solid ${m.border}` }}>
-                      <i className="ti ti-clock text-[13px]" aria-hidden="true"></i> Coming soon
-                    </span>
-                  ) : (
-                  <span className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[12.5px] font-bold uppercase tracking-wide text-white transition-all"
-                    style={{ background: m.gradient, boxShadow: `0 10px 20px -10px ${m.accent}` }}>
-                    View <i className="ti ti-arrow-right text-[13px]" aria-hidden="true"></i>
-                  </span>
+                  {m.soon && (
+                    <span className="text-[9.5px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                      style={{ background: C.surfaceAlt, color: C.textMuted, border: `1px solid ${C.border}` }}>Soon</span>
                   )}
                 </div>
+
+                <div className="text-[15px] font-bold mt-4" style={{ color: C.textPrimary }}>{m.title}</div>
+                <div className="text-[12.5px] mt-1 mb-5 flex-1" style={{ color: C.textSecondary }}>{m.tagline}</div>
+
+                {m.soon ? (
+                  <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: C.textMuted }}>
+                    <i className="ti ti-clock text-[13px]" aria-hidden="true"></i> Coming soon
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold" style={{ color: C.textPrimary }}>
+                    View overview
+                    <i className="ti ti-arrow-right text-[13px] transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: m.accent }} aria-hidden="true"></i>
+                  </span>
+                )}
               </button>
             ))}
           </div>
