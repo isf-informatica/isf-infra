@@ -18,7 +18,7 @@ export default function ModuleIntro() {
     <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
       <Topbar C={C} />
       <div style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <div className="px-7 py-8 max-w-4xl">
+        <div className="px-7 py-10 max-w-4xl mx-auto">
           <button onClick={() => navigate('/home')}
             className="flex items-center gap-1.5 text-[12.5px] font-medium mb-5 cursor-pointer bg-transparent border-none"
             style={{ color: C.textSecondary }}>
