@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Sidebar from '../common/Sidebar'
 import Topbar from '../common/Topbar'
 
 /* Shared UI kit for MDM module pages (Policy Management, Content Publishing,
@@ -398,7 +397,6 @@ export function MdmPage({ accent, accentDeep, accentBg, accentBorder, gradient, 
         <Topbar C={C} />
 
         <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-          <Sidebar C={C} activeKey={activeKey} />
 
           <div className="flex-1 min-w-0 px-7 py-7">
             <button onClick={() => navigate(backPath)} className="flex items-center gap-1 text-[12px] font-medium mb-3 cursor-pointer" style={{ color: C.textMuted, background: 'transparent', border: 'none' }}>

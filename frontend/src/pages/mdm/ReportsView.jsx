@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { getAllSchools } from '../../api/schools'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
 /* Same tokens as Login.jsx / MdmHub.jsx — kept identical so every page in the app matches. */
@@ -59,7 +58,6 @@ export default function ReportsView() {
       `}</style>
       <Topbar C={C} />
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey="mdm" />
 
         <div className="flex-1 px-7 py-7 max-w-5xl">
           <h1 className="text-[20px] font-extrabold tracking-tight mb-1" style={{ color: C.textPrimary }}>Real-time reports</h1>

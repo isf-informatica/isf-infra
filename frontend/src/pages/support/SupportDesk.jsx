@@ -1,4 +1,3 @@
-import Sidebar from '../../components/common/Sidebar'
 import useAuthStore from '../../store/authStore'
 import Topbar from '../../components/common/Topbar'
 import { INK, SUB, LINE, BG, NotifyHost } from './supportShared'
@@ -47,7 +46,6 @@ export default function SupportDesk() {
       <Topbar C={C} />
 
       <div className="flex flex-1 items-stretch">
-        <Sidebar C={C} activeKey="support" />
         <main className="flex-1 min-w-0 px-6 py-8 lg:px-10">
           <RoleContent role={role} />
         </main>

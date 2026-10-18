@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { getDevices, addDevice, deleteDevice } from '../../api/devices'
 import api from '../../api/axios'
 import useAuthStore from '../../store/authStore'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 import SchoolCards from '../../components/mdm/SchoolCards'
 
@@ -153,7 +152,6 @@ export default function EnrollmentView() {
       `}</style>
       <Topbar C={C} />
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey="mdm" />
 
         <div className="flex-1 px-7 py-7 max-w-6xl">
           <button onClick={() => schoolId ? setSchoolId(null) : navigate('/mdm')}

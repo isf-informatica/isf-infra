@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
 /* Shared design tokens — matched to the Login screen's ink / cream palette,
@@ -45,7 +44,6 @@ export default function ComingSoon({ title, moduleKey }) {
       <Topbar C={C} />
 
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey={moduleKey} />
 
         <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 text-center">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-2" style={{ background: C.systemBg, border: `1px solid ${C.systemBorder}` }}>

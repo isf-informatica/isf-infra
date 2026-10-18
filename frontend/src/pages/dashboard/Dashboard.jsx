@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAllSchools } from '../../api/schools'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
 /* Shared design tokens — kept consistent across the whole app */
@@ -142,7 +141,6 @@ export default function Dashboard() {
       <Topbar C={C} />
 
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey="mdm" />
 
         <div className="flex-1 px-7 py-7 max-w-7xl mx-auto">
         {/* Hero banner */}

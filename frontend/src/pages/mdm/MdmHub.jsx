@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
 /* Same base tokens as Dashboard.jsx / Login.jsx — kept identical so the page
@@ -143,7 +142,6 @@ export default function MdmHub() {
       <Topbar C={C} />
 
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey="mdm" />
 
         <div className="flex-1 px-7 py-7">
           <div className="mb-6 flex items-end justify-between flex-wrap gap-3">

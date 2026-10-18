@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDevices } from '../../api/devices'
 import { sendCommand, pollCommandResult } from '../../api/commands'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 import SchoolCards from '../../components/mdm/SchoolCards'
 
@@ -269,7 +268,6 @@ export default function RemoteManagementView() {
     <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
       <Topbar C={C} />
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey="mdm" />
 
         {!schoolId ? (
           <div className="flex-1 px-7 py-7 max-w-4xl">

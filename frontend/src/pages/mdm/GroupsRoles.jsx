@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
 /* Same tokens as Login.jsx / MdmHub.jsx — kept identical so every page in the app matches. */
@@ -96,7 +95,6 @@ export default function GroupsRoles() {
       <Topbar C={C} />
 
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey="mdm" />
 
         <div className="flex-1 px-7 py-7 max-w-5xl">
           <div className="flex items-start justify-between mb-2">

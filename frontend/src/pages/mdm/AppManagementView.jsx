@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 import {
   getInstitutions, getAppSummary, getAppInventory, syncInventory, setAppStatus,
@@ -238,7 +237,6 @@ export default function AppManagementView() {
       <Topbar C={C} />
 
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey="mdm" />
 
         <div className="flex-1 min-w-0 px-7 py-7">
           {/* Breadcrumb */}
