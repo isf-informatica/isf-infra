@@ -155,7 +155,9 @@ export function visibleModules(user) {
 export default function Home() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
-  const mods = visibleModules(user)
+  // Active (built) modules first, "coming soon" ones last — stable, so the
+  // registry order is kept within each group.
+  const mods = [...visibleModules(user)].sort((a, b) => (a.soon ? 1 : 0) - (b.soon ? 1 : 0))
 
   return (
     <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
