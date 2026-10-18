@@ -30,72 +30,103 @@ const LICENSE_MANAGER_EMAIL = 'yash@isf.com'
 /* One registry for the home cards AND the per-module intro page. */
 export const MODULES = [
   {
-    key: 'drm',
-    title: 'Digital Rights Management',
-    tagline: 'Protect & track your paid content',
+    key: 'infradc',
+    title: 'InfraDC',
+    tagline: 'Remote device management',
+    icon: 'ti-device-desktop',
+    accent: '#2563EB', deep: '#1D4ED8', bg: '#EFF6FF', border: '#BFDBFE',
+    gradient: 'linear-gradient(135deg, #2563EB, #60A5FA)',
+    path: '/mdm',
+    summary: 'Remote device management — control, lock, wipe and monitor every enrolled Windows & Android device across your institutions from one console.',
+    features: ['Device enrollment & provisioning', 'Remote management (lock / wipe / restart)', 'App management (blacklist / whitelist / push)', 'Security policies, Wi-Fi & time fencing', 'Content publishing & secure browser', 'Geofencing & real-time reports'],
+  },
+  {
+    key: 'infradrm',
+    title: 'InfraDRM',
+    tagline: 'Digital Rights Management',
     icon: 'ti-shield-lock',
     accent: '#4F46E5', deep: '#3730A3', bg: '#EEF2FF', border: '#C7D2FE',
     gradient: 'linear-gradient(135deg, #4F46E5, #818CF8)',
     path: '/modules/drm',
-    summary: 'Encrypt, license and track every video, PDF and eBook you distribute. Content is AES-encrypted on the server, streamed with a device-bound key, watermarked on every screen, and traceable if it ever leaks.',
+    summary: 'Protect and license digital content across your network. Every video, PDF and eBook is AES-encrypted, device-bound, watermarked on screen, and traceable if it ever leaks.',
     features: ['Protected content library', 'Rights policies (view / download / print / time / geo)', 'Licenses & hardware device binding', 'Forensic leak tracing from a watermark', 'Live access audit log'],
   },
   {
-    key: 'mdm',
-    title: 'MDM Software',
-    tagline: 'Manage every enrolled device',
-    icon: 'ti-device-desktop-analytics',
-    accent: '#2563EB', deep: '#1D4ED8', bg: '#EFF6FF', border: '#BFDBFE',
-    gradient: 'linear-gradient(135deg, #2563EB, #60A5FA)',
-    path: '/mdm',
-    summary: 'A single console to manage every enrolled Windows & Android device across your institutions — enroll devices, push apps and security policies, publish content and lock down browsing.',
-    features: ['Device enrollment & provisioning', 'Remote device management', 'App management (blacklist / whitelist / push)', 'Security policies, Wi-Fi & time fencing', 'Content publishing & secure browser', 'Geofencing & real-time reports'],
+    key: 'infranet',
+    title: 'InfraNet',
+    tagline: 'Network monitoring',
+    icon: 'ti-affiliate',
+    accent: '#0D9488', deep: '#0F766E', bg: '#ECFEFF', border: '#99F6E4',
+    gradient: 'linear-gradient(135deg, #14B8A6, #0D9488)',
+    soon: true,
+    summary: 'Real-time visibility into connectivity and infrastructure health across every site — uptime, bandwidth, device reachability and alerts.',
+    features: ['Live uptime & latency monitoring', 'Bandwidth & traffic insights', 'Device & link health', 'Outage alerts'],
   },
   {
-    key: 'vapt',
-    title: 'VAPT',
-    tagline: 'Find & fix security weaknesses',
-    icon: 'ti-shield-bolt',
-    accent: '#0891B2', deep: '#0E7490', bg: '#ECFEFF', border: '#A5F3FC',
-    gradient: 'linear-gradient(135deg, #06B6D4, #0E7490)',
-    path: '/modules/vapt',
-    summary: 'Assess your web, API and cloud assets for security weaknesses. Run scans, review findings with CVSS scores and OWASP mapping, track remediation and generate client reports.',
-    features: ['Network / Web / API / Cloud scans', 'Findings with CVSS severity & remediation', 'OWASP Top 10 & compliance mapping', 'Executive & technical report generation'],
+    key: 'infradms',
+    title: 'InfraDMS',
+    tagline: 'Document Management System',
+    icon: 'ti-file-text',
+    accent: '#D97706', deep: '#B45309', bg: '#FFF7ED', border: '#FED7AA',
+    gradient: 'linear-gradient(135deg, #F59E0B, #D97706)',
+    soon: true,
+    summary: 'Centralized, secure document storage and workflows — versioning, access control and approvals for every institution.',
+    features: ['Central document repository', 'Version control', 'Role-based access', 'Approval workflows'],
+  },
+  {
+    key: 'infracloud',
+    title: 'InfraCloud',
+    tagline: 'Cloud infrastructure layer',
+    icon: 'ti-cloud',
+    accent: '#0EA5E9', deep: '#0284C7', bg: '#F0F9FF', border: '#BAE6FD',
+    gradient: 'linear-gradient(135deg, #38BDF8, #0284C7)',
+    soon: true,
+    summary: 'Storage, backup and hosting for all InfraPoint modules — the cloud layer that every other module runs on.',
+    features: ['Object & file storage', 'Automated backups', 'Hosting for all modules', 'Usage & cost insights'],
   },
   {
     key: 'fortimates',
     title: 'FortiMates',
-    tagline: 'Fintech & KYC platform',
-    icon: 'ti-coin',
+    tagline: 'Verified-ID email & call system',
+    icon: 'ti-mail-check',
     accent: '#CA8A04', deep: '#A16207', bg: '#FEFCE8', border: '#FDE68A',
     gradient: 'linear-gradient(135deg, #EAB308, #CA8A04)',
     path: '/modules/fortimates/dashboard',
-    summary: 'Fintech identity & KYC platform — verify users, track mails and calls, and manage requests from one admin dashboard.',
-    features: ['Dashboard overview & analytics', 'KYC module & verification', 'Requests queue', 'Mail & call tracking', 'Admin & configuration'],
+    summary: 'Eliminate fraud with sender verification and call tracking. A verified-ID email & call system with full KYC and admin controls.',
+    features: ['Dashboard overview & analytics', 'KYC module & verification', 'Mail tracker (verified sender)', 'Call tracking', 'Requests queue', 'Admin & configuration'],
   },
   {
-    key: 'support',
-    title: 'Support',
-    tagline: 'Raise & track tickets',
-    icon: 'ti-headset',
-    accent: '#2F6B45', deep: '#235536', bg: '#EAF3EC', border: '#BFDAC8',
-    gradient: 'linear-gradient(135deg, #2F6B45, #5BA373)',
-    path: '/support',
-    roles: ['requester', 'service_desk', 'admin', 'master'],
-    summary: 'Raise, assign and resolve support tickets between requesters, service-desk staff and admins — all tracked in one place.',
-    features: ['Raise a request', 'Ticket queue', 'Staff assignment', 'Resolution tracking'],
+    key: 'vapt',
+    title: 'VAPT',
+    tagline: 'Vulnerability Assessment & Pen-Testing',
+    icon: 'ti-shield-check',
+    accent: '#0891B2', deep: '#0E7490', bg: '#ECFEFF', border: '#A5F3FC',
+    gradient: 'linear-gradient(135deg, #06B6D4, #0E7490)',
+    path: '/modules/vapt',
+    summary: 'Find and fix security gaps before attackers do. Scan web, API and cloud assets, review findings with CVSS scores and OWASP mapping, and generate reports.',
+    features: ['Network / Web / API / Cloud scans', 'Findings with CVSS severity & remediation', 'OWASP Top 10 & compliance mapping', 'Executive & technical report generation'],
   },
   {
-    key: 'license',
-    title: 'License Management',
-    tagline: 'Issue & manage license keys',
-    icon: 'ti-key',
-    accent: '#7C5CFC', deep: '#5B3FD6', bg: '#F3F0FF', border: '#D6CCFE',
-    gradient: 'linear-gradient(135deg, #A78BFA, #7C5CFC)',
-    path: '/license',
-    email: LICENSE_MANAGER_EMAIL,
-    summary: 'Generate and manage product license keys — issue new keys, assign them to institutions, track usage and handle violations.',
-    features: ['License dashboard', 'Generate keys', 'Assign to schools', 'Usage & violations'],
+    key: 'infrasurveillance',
+    title: 'InfraSurveillance',
+    tagline: 'Camera & physical monitoring',
+    icon: 'ti-video',
+    accent: '#E11D48', deep: '#BE123C', bg: '#FFF1F2', border: '#FECDD3',
+    gradient: 'linear-gradient(135deg, #F43F5E, #BE123C)',
+    soon: true,
+    summary: 'Live camera feeds and incident alerts across all sites — physical security monitoring integrated with the rest of the platform.',
+    features: ['Live camera feeds', 'Incident & motion alerts', 'Multi-site view', 'Recording & playback'],
+  },
+  {
+    key: 'smartmeters',
+    title: 'SmartMeters',
+    tagline: 'IoT utility tracking',
+    icon: 'ti-gauge',
+    accent: '#16A34A', deep: '#15803D', bg: '#F0FDF4', border: '#BBF7D0',
+    gradient: 'linear-gradient(135deg, #22C55E, #15803D)',
+    soon: true,
+    summary: 'Monitor electricity, water and resource usage in real time with IoT meters — usage trends, alerts and cost tracking per site.',
+    features: ['Real-time electricity & water usage', 'Per-site consumption', 'Usage alerts & thresholds', 'Cost & trend reports'],
   },
 ]
 
@@ -143,6 +174,10 @@ export default function Home() {
                 {/* Gradient header */}
                 <div className="h-28 relative flex items-center justify-center" style={{ background: m.gradient }}>
                   <div className="pointer-events-none absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(#FFFFFF22 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                  {m.soon && (
+                    <span className="absolute top-3 right-3 text-[9.5px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                      style={{ background: 'rgba(255,255,255,0.9)', color: m.deep }}>Soon</span>
+                  )}
                   <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
                     style={{ background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(255,255,255,0.5)', backdropFilter: 'blur(8px)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 18px -8px rgba(0,0,0,0.3)' }}>
                     <i className={`ti ${m.icon} text-[28px] text-white`} aria-hidden="true"></i>
@@ -152,10 +187,17 @@ export default function Home() {
                 <div className="p-5 flex flex-col flex-1">
                   <div className="text-[15px] font-bold" style={{ color: C.textPrimary }}>{m.title}</div>
                   <div className="text-[12.5px] mt-0.5 mb-4 flex-1" style={{ color: C.textSecondary }}>{m.tagline}</div>
+                  {m.soon ? (
+                    <span className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[12px] font-bold uppercase tracking-wide"
+                      style={{ background: C.surfaceAlt, color: m.deep, border: `1px solid ${m.border}` }}>
+                      <i className="ti ti-clock text-[13px]" aria-hidden="true"></i> Coming soon
+                    </span>
+                  ) : (
                   <span className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[12.5px] font-bold uppercase tracking-wide text-white transition-all"
                     style={{ background: m.gradient, boxShadow: `0 10px 20px -10px ${m.accent}` }}>
                     View <i className="ti ti-arrow-right text-[13px]" aria-hidden="true"></i>
                   </span>
+                  )}
                 </div>
               </button>
             ))}
