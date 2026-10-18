@@ -119,13 +119,13 @@ export const MODULES = [
   },
   {
     key: 'signage',
-    title: 'Digital Signage',
+    title: 'Digital Signboard',
     tagline: 'Screens & content management',
     icon: 'ti-device-tv',
     accent: '#C026D3', deep: '#A21CAF', bg: '#FDF4FF', border: '#F5D0FE',
     gradient: 'linear-gradient(135deg, #D946EF, #A21CAF)',
     path: '/modules/signage',
-    summary: 'Control digital signage screens and the content on them across every site from one dashboard — push playlists, schedule by time of day, and monitor every display remotely.',
+    summary: 'Control digital signboard screens and the content on them across every site from one dashboard — push playlists, schedule by time of day, and monitor every display remotely.',
     features: ['Remote screen management (restart / refresh / screenshot)', 'Content library (image / video / PDF / web / widget)', 'Playlists with looping & sequencing', 'Day-part scheduling & campaigns', 'Multi-zone layouts & multi-platform players', 'Playback analytics & uptime reports'],
   },
   {

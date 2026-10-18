@@ -41,7 +41,7 @@ export default function SignageView() {
   usePoll(refresh, true, 15000)
 
   return (
-    <MdmPage {...THEME} icon="ti-device-tv" title="Digital Signage"
+    <MdmPage {...THEME} icon="ti-device-tv" title="Digital Signboard"
       subtitle="Control screens, content and schedules across every site — from one dashboard"
       tabs={TABS} tab={tab} onTab={setTab} toasts={toasts}
       activeKey="signage" backPath="/home" backLabel="Home"
