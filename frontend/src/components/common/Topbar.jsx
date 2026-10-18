@@ -14,7 +14,7 @@ export default function Topbar({ C }) {
           <i className="ti ti-server-2 text-white text-lg" aria-hidden="true"></i>
         </div>
         <div>
-          <div className="text-[14.5px] font-semibold" style={{ color: C.textPrimary }}>EasyReach</div>
+          <div className="text-[14.5px] font-semibold" style={{ color: C.textPrimary }}>InfraPoint</div>
           <div className="text-[12px]" style={{ color: C.textSecondary }}>ISF Media Server Control</div>
         </div>
       </div>
