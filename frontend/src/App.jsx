@@ -9,6 +9,7 @@ import SetupGuide from './pages/schools/SetupGuide'
 import SmartSetup from './pages/schools/SmartSetup'
 import Devices from './pages/schools/Devices'
 import Home from './pages/modules/Home'
+import ModuleIntro from './pages/modules/ModuleIntro'
 import ComingSoon from './pages/modules/ComingSoon'
 import MdmHub from './pages/mdm/MdmHub'
 import GroupsRoles from './pages/mdm/GroupsRoles'
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/home/:key" element={<ProtectedRoute><ModuleIntro /></ProtectedRoute>} />
         <Route path="/support" element={<ProtectedRoute><SupportDesk /></ProtectedRoute>} />
         <Route path="/mdm" element={<ProtectedRoute><MdmHub /></ProtectedRoute>} />
         <Route path="/mdm/groups-roles" element={<ProtectedRoute><GroupsRoles /></ProtectedRoute>} />
