@@ -1,6 +1,5 @@
 import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 import { C, visibleModules } from './Home'
 
@@ -18,10 +17,8 @@ export default function ModuleIntro() {
   return (
     <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
       <Topbar C={C} />
-      <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey={mod.key} />
-
-        <div className="flex-1 min-w-0 px-7 py-8 max-w-4xl">
+      <div style={{ minHeight: 'calc(100vh - 73px)' }}>
+        <div className="max-w-4xl mx-auto px-7 py-8">
           <button onClick={() => navigate('/home')}
             className="flex items-center gap-1.5 text-[12.5px] font-medium mb-5 cursor-pointer bg-transparent border-none"
             style={{ color: C.textSecondary }}>

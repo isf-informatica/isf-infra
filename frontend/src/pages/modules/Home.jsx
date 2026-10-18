@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
-import Sidebar from '../../components/common/Sidebar'
 import Topbar from '../../components/common/Topbar'
 
 /* Shared ink / cream palette — same tokens the rest of the app uses. */
@@ -123,10 +122,8 @@ export default function Home() {
       `}</style>
       <Topbar C={C} />
 
-      <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <Sidebar C={C} activeKey={null} />
-
-        <div className="flex-1 min-w-0 px-7 py-8">
+      <div style={{ minHeight: 'calc(100vh - 73px)' }}>
+        <div className="max-w-7xl mx-auto px-7 py-8">
           <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>ISF Infra</p>
           <h1 className="text-[24px] font-extrabold tracking-tight mt-1" style={{ color: C.textPrimary }}>
             Welcome{user?.name ? `, ${user.name}` : ''}
