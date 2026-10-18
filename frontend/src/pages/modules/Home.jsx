@@ -123,7 +123,7 @@ export default function Home() {
       <Topbar C={C} />
 
       <div style={{ minHeight: 'calc(100vh - 73px)' }}>
-        <div className="max-w-7xl mx-auto px-7 py-8">
+        <div className="px-7 py-8">
           <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>ISF Infra</p>
           <h1 className="text-[24px] font-extrabold tracking-tight mt-1" style={{ color: C.textPrimary }}>
             Welcome{user?.name ? `, ${user.name}` : ''}
