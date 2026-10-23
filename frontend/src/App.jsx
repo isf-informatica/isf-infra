@@ -28,12 +28,6 @@ import SupportDesk from './pages/support/SupportDesk'
 import InfraPointLanding from './pages/marketing/InfraPointLanding'
 import useAuthStore from './store/authStore'
 import LicenseHub from './pages/license/Licensehub'
-import LicenseDashboardView from './pages/license/Licensedashboardview'
-import LicenseGenerateView from './pages/license/Licensegenerateview'
-import LicenseManageView from './pages/license/Licensemanageview'
-import LicenseAssignView from './pages/license/Licenseassignview'
-import LicenseUsageView from './pages/license/Licenseusageview'
-import LicenseViolationsView from './pages/license/Licenseviolationsview'
 import OrganizerView from './pages/organizer/OrganizerView'
 import IssueView from './pages/issues/IssueView'
 import AssetView from './pages/assets/AssetView'
@@ -97,13 +91,11 @@ export default function App() {
         <Route path="/schools/:id/kill" element={<ProtectedRoute><KillSwitch /></ProtectedRoute>} />
         <Route path="/schools/:id/setup" element={<ProtectedRoute><SetupGuide /></ProtectedRoute>} />
         <Route path="/schools/:id/devices" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
+        {/* License Management: one shell (same as DRM / VAPT) with a tab per view.
+            /license/dashboard, /generate, /manage, /assign, /usage, /violations
+            still work — the :tab param picks the tab. */}
         <Route path="/license" element={<LicenseHub />} />
-        <Route path="/license/dashboard" element={<LicenseDashboardView />} />
-        <Route path="/license/generate" element={<LicenseGenerateView />} />
-        <Route path="/license/manage" element={<LicenseManageView />} />
-        <Route path="/license/assign" element={<LicenseAssignView />} />
-        <Route path="/license/usage" element={<LicenseUsageView />} />
-        <Route path="/license/violations" element={<LicenseViolationsView />} />
+        <Route path="/license/:tab" element={<LicenseHub />} />
       </Routes>
     </BrowserRouter>
   )

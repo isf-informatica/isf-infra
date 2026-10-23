@@ -1,51 +1,60 @@
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams, Navigate } from 'react-router-dom'
+import { MdmPage, useToasts } from '../../components/mdm/MdmKit'
+import { getLicenseStats } from '../../api/license'
+import LicenseDashboardView from './Licensedashboardview'
+import LicenseGenerateView from './Licensegenerateview'
+import LicenseManageView from './Licensemanageview'
+import LicenseAssignView from './Licenseassignview'
+import LicenseUsageView from './Licenseusageview'
+import LicenseViolationsView from './Licenseviolationsview'
 
-const INK = '#1A1A18'
-const SUB = '#5C5C57'
-const BG = '#E8E8E3'
+/* License Management — same MdmPage shell as DRM / VAPT / MDM (topbar, back
+   link, header, tab bar). The six existing views are rendered unchanged inside
+   the tabs; the tab comes from the URL (/license/:tab), so every existing
+   navigate('/license/…') call inside those views simply switches tab. */
 
-const CARDS = [
-  { title: 'License Dashboard', desc: 'Overview of all active licenses', icon: 'ti-layout-dashboard', path: '/license/dashboard' },
-  { title: 'Generate License', desc: 'Create and issue new license keys', icon: 'ti-key', path: '/license/generate' },
-  { title: 'Manage Licenses', desc: 'View, edit and revoke licenses', icon: 'ti-list-details', path: '/license/manage' },
-  { title: 'Assign to Schools', desc: 'Distribute licenses to institutions', icon: 'ti-building-community', path: '/license/assign' },
-  { title: 'Usage & Activity', desc: 'Track license usage and history', icon: 'ti-history', path: '/license/usage' },
-  { title: 'Violations', desc: 'Monitor and resolve license violations', icon: 'ti-alert-triangle', path: '/license/violations' },
+const THEME = {
+  accent: '#9333EA', accentDeep: '#7E22CE', accentBg: '#FAF5FF', accentBorder: '#E9D5FF',
+  gradient: 'linear-gradient(135deg, #A855F7, #7E22CE)',
+}
+
+const TABS = [
+  { key: 'dashboard', label: 'Dashboard', icon: 'ti-layout-dashboard', View: LicenseDashboardView },
+  { key: 'generate', label: 'Generate', icon: 'ti-key', View: LicenseGenerateView },
+  { key: 'manage', label: 'Manage', icon: 'ti-list-details', View: LicenseManageView },
+  { key: 'assign', label: 'Assign to Schools', icon: 'ti-building-community', View: LicenseAssignView },
+  { key: 'usage', label: 'Usage & Activity', icon: 'ti-history', View: LicenseUsageView },
+  { key: 'violations', label: 'Violations', icon: 'ti-alert-triangle', View: LicenseViolationsView },
 ]
 
 export default function LicenseHub() {
+  const { tab = 'dashboard' } = useParams()
   const navigate = useNavigate()
+  const { toasts } = useToasts()
+  const [stats, setStats] = useState(null)
+
+  useEffect(() => { getLicenseStats().then(setStats).catch(() => {}) }, [tab])
+
+  const current = TABS.find(t => t.key === tab)
+  if (!current) return <Navigate to="/license" replace />
+  const View = current.View
 
   return (
-    <div className="p-8" style={{ background: BG, minHeight: '100%' }}>
-      <div className="mb-6">
-        <h2 className="text-2xl font-extrabold uppercase tracking-tight" style={{ color: INK }}>License Management</h2>
-        <p className="text-sm mt-1.5" style={{ color: SUB }}>Generate, assign and monitor licenses across every institution.</p>
-      </div>
-
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
-        {CARDS.map((card) => (
-          <button
-            key={card.path}
-            onClick={() => navigate(card.path)}
-            className="text-left bg-white border p-5 flex flex-col gap-4 transition-colors"
-            style={{ borderColor: INK + '1A' }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = INK}
-            onMouseLeave={e => e.currentTarget.style.borderColor = INK + '1A'}
-          >
-            <div className="w-11 h-11 flex items-center justify-center" style={{ background: INK }}>
-              <i className={`ti ${card.icon} text-[20px] text-white`} aria-hidden="true"></i>
-            </div>
-            <div>
-              <p className="text-[14px] font-bold" style={{ color: INK }}>{card.title}</p>
-              <p className="text-[12.5px] mt-1 leading-relaxed" style={{ color: SUB }}>{card.desc}</p>
-            </div>
-            <div className="mt-auto flex items-center gap-1.5 text-[12.5px] font-semibold" style={{ color: INK }}>
-              Open <i className="ti ti-arrow-right text-[14px]" aria-hidden="true"></i>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
+    <MdmPage {...THEME} icon="ti-key" title="License Management"
+      subtitle="Generate, assign and monitor licenses across every institution"
+      tabs={TABS} tab={tab} onTab={(k) => navigate(k === 'dashboard' ? '/license' : `/license/${k}`)} toasts={toasts}
+      activeKey="license" backPath="/home" backLabel="Home"
+      status={stats ? `${stats.active_licenses} active · ${stats.total_licenses} total` : 'connecting…'}>
+      {/* The views were built as full pages — inside the shell, drop their own
+          page padding/background and the duplicate title (the tab already says it). */}
+      <style>{`
+        .lic-embed > div { padding: 0 !important; background: transparent !important; min-height: 0 !important; }
+        .lic-embed h2.text-2xl, .lic-embed h2.text-2xl + p { display: none; }
+        .lic-embed > div > div.mb-6:first-child:not(:has(button)) { display: none; }
+        .lic-embed > div > div.mb-6:first-child:has(button) { justify-content: flex-end; }
+      `}</style>
+      <div className="lic-embed"><View /></div>
+    </MdmPage>
   )
 }
