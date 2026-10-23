@@ -34,6 +34,10 @@ import LicenseManageView from './pages/license/Licensemanageview'
 import LicenseAssignView from './pages/license/Licenseassignview'
 import LicenseUsageView from './pages/license/Licenseusageview'
 import LicenseViolationsView from './pages/license/Licenseviolationsview'
+import OrganizerView from './pages/organizer/OrganizerView'
+import IssueView from './pages/issues/IssueView'
+import AssetView from './pages/assets/AssetView'
+import AccountView from './pages/accounts/AccountView'
 
 // FortiMates module (pages/fortimates) — lazy-loaded so its heavy bundle
 // (charts, icons, animations) only downloads when the FortiMates page is opened.
@@ -69,6 +73,10 @@ export default function App() {
         <Route path="/modules/drm" element={<ProtectedRoute><DrmView /></ProtectedRoute>} />
         <Route path="/modules/vapt" element={<ProtectedRoute><VaptView /></ProtectedRoute>} />
         <Route path="/modules/signage" element={<ProtectedRoute><SignageView /></ProtectedRoute>} />
+        <Route path="/modules/organizer" element={<ProtectedRoute><OrganizerView /></ProtectedRoute>} />
+        <Route path="/modules/issues" element={<ProtectedRoute><IssueView /></ProtectedRoute>} />
+        <Route path="/modules/assets" element={<ProtectedRoute><AssetView /></ProtectedRoute>} />
+        <Route path="/modules/accounts" element={<ProtectedRoute><AccountView /></ProtectedRoute>} />
         {/* FortiMates: ComingSoon replaced by the real FortiMates module.
             "/*" lets its inner pages work: /modules/fortimates/dashboard, /login, etc. */}
         <Route
