@@ -32,6 +32,7 @@ import OrganizerView from './pages/organizer/OrganizerView'
 import IssueView from './pages/issues/IssueView'
 import AssetView from './pages/assets/AssetView'
 import AccountView from './pages/accounts/AccountView'
+import VisitorView from './pages/visitors/VisitorView'
 
 // FortiMates module (pages/fortimates) — lazy-loaded so its heavy bundle
 // (charts, icons, animations) only downloads when the FortiMates page is opened.
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="/modules/issues" element={<ProtectedRoute><IssueView /></ProtectedRoute>} />
         <Route path="/modules/assets" element={<ProtectedRoute><AssetView /></ProtectedRoute>} />
         <Route path="/modules/accounts" element={<ProtectedRoute><AccountView /></ProtectedRoute>} />
+        <Route path="/modules/visitors" element={<ProtectedRoute><VisitorView /></ProtectedRoute>} />
         {/* FortiMates: ComingSoon replaced by the real FortiMates module.
             "/*" lets its inner pages work: /modules/fortimates/dashboard, /login, etc. */}
         <Route

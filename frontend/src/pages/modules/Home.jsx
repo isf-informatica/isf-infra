@@ -174,6 +174,17 @@ export const MODULES = [
     features: ['Books of accounts (credit / debit, INR)', 'Custom expense heads', 'Vendor bills & payments', 'GST invoices & receipts', 'Narration suggestions', 'Monthly income vs expense'],
   },
   {
+    key: 'visitors',
+    title: 'Visitor Management',
+    tagline: 'Gate entry & visitor passes',
+    icon: 'ti-id-badge-2',
+    accent: '#0D9488', deep: '#0F766E', bg: '#F0FDFA', border: '#99F6E4',
+    gradient: 'linear-gradient(135deg, #14B8A6, #0F766E)',
+    path: '/modules/visitors',
+    summary: 'Register every visitor at the gate with photo and ID, issue a time-bound gate pass, see who is on premises right now and keep a security log of every entry and exit.',
+    features: ['Visitor registration with photo & ID proof', 'Time-bound gate pass (1 to 24 hours) with print', 'Live on-premises list with expired-pass alerts', 'One-click check-out & cancel', 'Visit history & CSV report by date range', 'Security log of every check-in / check-out'],
+  },
+  {
     key: 'infrasurveillance',
     title: 'InfraSurveillance',
     tagline: 'Camera & physical monitoring',
