@@ -133,6 +133,16 @@ export default function MdmHub() {
       <div className="flex" style={{ minHeight: 'calc(100vh - 73px)' }}>
 
         <div className="flex-1 px-7 py-7">
+          {/* Back to the all-modules Home page (same pattern as ModuleIntro) */}
+          <button onClick={() => navigate('/home')}
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold mb-4 cursor-pointer bg-transparent border-none p-0"
+            style={{ color: C.textSecondary }}
+            onMouseEnter={e => { e.currentTarget.style.color = C.textPrimary }}
+            onMouseLeave={e => { e.currentTarget.style.color = C.textSecondary }}>
+            <i className="ti ti-arrow-left text-[14px]" aria-hidden="true"></i>
+            Back to all modules
+          </button>
+
           <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
             <div>
               <h1 className="text-[22px] font-extrabold tracking-tight" style={{ color: C.textPrimary }}>MDM software</h1>

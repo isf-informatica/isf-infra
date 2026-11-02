@@ -4,12 +4,13 @@ import {
   Kpi, Pill, PILL, PLATFORM_META, RolloutBar, RolloutStatus, TargetPicker, Stepper,
   useToasts, usePoll, timeAgo, fmt, downloadBlob,
 } from '../../components/mdm/MdmKit'
-import { getInstitutions } from '../../api/appManagement'
-import { deviceCountFor } from '../../api/mdmDemoStore'
 import {
-  DEFAULT_SETTINGS, getPolicySummary, getPolicies, savePolicy, duplicatePolicy, deletePolicy, pushPolicy,
+  DEFAULT_SETTINGS, getPolicySummary, getPolicyTargets, getPolicies, savePolicy, duplicatePolicy, deletePolicy, pushPolicy,
   getRollouts, retryRollout, getViolations, remediate, getAuditLog, exportCompliance,
 } from '../../api/policyManagement'
+
+// Real device count per institution = Windows PCs with the EasyReach agent (from backend)
+const deviceCountFor = (inst) => inst.devices || 0
 
 const ACCENT = '#17B26A'
 const THEME = {
@@ -48,7 +49,7 @@ export default function PolicyManagementView() {
   const { toasts, toast } = useToasts()
 
   const refreshSummary = useCallback(() => getPolicySummary().then(setSummary).catch(() => {}), [])
-  useEffect(() => { refreshSummary(); getInstitutions().then(setInstitutions) }, [refreshSummary])
+  useEffect(() => { refreshSummary(); getPolicyTargets().then(setInstitutions).catch(() => setInstitutions([])) }, [refreshSummary])
 
   return (
     <MdmPage {...THEME} icon="ti-shield-check" title="Policy Management"
@@ -351,8 +352,13 @@ function PushModal({ policy, institutions, onClose, onPushed }) {
   const submit = async () => {
     setSubmitting(true)
     const names = institutions.filter(i => targets.includes(i.id)).map(i => i.name)
-    const ro = await pushPolicy(policy.id, { targetLabel: allSelected ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0], deviceCount: count, schedule: mode })
-    onPushed(ro)
+    try {
+      const ro = await pushPolicy(policy.id, { targetLabel: allSelected ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0], deviceCount: count, schedule: mode, institutionIds: targets })
+      onPushed(ro)
+    } catch (e) {
+      setSubmitting(false)
+      alert(e?.response?.data?.detail || 'Push failed. Please try again.')
+    }
   }
 
   return (
@@ -389,6 +395,12 @@ function PushModal({ policy, institutions, onClose, onPushed }) {
             <i className="ti ti-info-circle text-[15px] mt-0.5" style={{ color: THEME.accentDeep }} aria-hidden="true"></i>
             Offline devices receive this policy automatically when they reconnect.
           </div>
+          {policy.platform !== 'windows' && (
+            <div className="rounded-xl px-4 py-3 mt-2 text-[12px] flex items-start gap-2.5" style={{ background: C.warningBg, border: `1px solid ${C.warningBorder}`, color: C.warning }}>
+              <i className="ti ti-alert-triangle text-[15px] mt-0.5" aria-hidden="true"></i>
+              Android agent is not available yet — this policy will be saved as active but no device will receive it. Windows policies are enforced on PCs right now.
+            </div>
+          )}
           <div className="flex justify-between gap-2 pt-5">
             <Btn icon="ti-arrow-left" onClick={() => setStep(1)}>Back</Btn>
             <Btn variant="accent" icon="ti-send" loading={submitting} onClick={submit}>Push to {fmt(count)} devices</Btn>
