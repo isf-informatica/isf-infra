@@ -4,12 +4,13 @@ import {
   Kpi, Pill, PILL, RolloutBar, RolloutStatus, TargetPicker,
   useToasts, usePoll, timeAgo, fmt, downloadBlob,
 } from '../../components/mdm/MdmKit'
-import { getInstitutions } from '../../api/appManagement'
-import { deviceCountFor } from '../../api/mdmDemoStore'
 import {
-  CATEGORIES, getBrowserSummary, getConfig, updateConfig, setCategory, pushConfig, getRollout,
+  CATEGORIES, getBrowserSummary, getBrowserTargets, getConfig, updateConfig, setCategory, pushConfig, getRollout,
   getRules, addRule, deleteRule, setKeywords, getActivity, exportActivity,
 } from '../../api/secureBrowser'
+
+// Real device count per institution = Windows PCs with the EasyReach agent (from backend)
+const deviceCountFor = (inst) => inst.devices || 0
 
 const ACCENT = '#E4483C'
 const THEME = {
@@ -43,7 +44,7 @@ export default function SecureBrowserView() {
     setRollout(r)
   }, [toast, refreshSummary])
 
-  useEffect(() => { refreshSummary(); refreshRollout(); getInstitutions().then(setInstitutions) }, [refreshSummary, refreshRollout])
+  useEffect(() => { refreshSummary(); refreshRollout(); getBrowserTargets().then(setInstitutions).catch(() => setInstitutions([])) }, [refreshSummary, refreshRollout])
   usePoll(refreshRollout, rollout?.status === 'running')
 
   const changed = useCallback((msg) => { refreshSummary(); if (msg) toast(msg) }, [refreshSummary, toast])
@@ -266,7 +267,7 @@ function ListsTab({ institutions, onChanged }) {
       </Card>
 
       <Card>
-        <CardHeader title="Blocked keywords" sub="Searches & URLs containing these words are blocked" />
+        <CardHeader title="Blocked keywords" sub="Saved for the Android agent — Chrome/Edge on Windows cannot block by keyword yet" />
         <div className="p-5">
           <div className="flex gap-2 mb-3">
             <Input value={kw} onChange={e => setKw(e.target.value)} onKeyDown={e => e.key === 'Enter' && addKw()} placeholder="Add keyword" />
@@ -365,7 +366,7 @@ function SettingsTab({ onChanged }) {
           </div>
         </Card>
         <Card>
-          <CardHeader title="Kiosk mode" sub="Lock the browser to a single website — for exams or digital notice boards"
+          <CardHeader title="Kiosk mode" sub="Lock the browser to a single website — saved for Android; not applied on Windows PCs yet (tip: use Allow-list mode with only that site)"
             right={<Switch on={cfg.kiosk} onChange={v => { if (v && !kioskUrl.trim()) { setCfg(c => ({ ...c, kiosk: true })); return } set({ kiosk: v, kioskUrl }, v ? 'Kiosk mode on — push to apply' : 'Kiosk mode off — push to apply') }} />} />
           {cfg.kiosk && (
             <div className="p-5">
@@ -431,7 +432,7 @@ function ActivityTab({ toast }) {
           <Btn variant="primary" icon="ti-file-spreadsheet" loading={exporting} onClick={doExport}>Export to Excel</Btn>
         </div>
       </div>
-      {!rows ? <Loader label="Loading browser activity…" /> : shown.length === 0 ? <Empty>No matching activity.</Empty> : (
+      {!rows ? <Loader label="Loading browser activity…" /> : shown.length === 0 ? <Empty>No blocked attempts reported yet. Windows Chrome/Edge block silently and do not send a report to InfraPoint — this log fills when the browser-reporting agent is added.</Empty> : (
         <div className="overflow-x-auto">
           <table className="w-full text-left" style={{ minWidth: 820 }}>
             <thead>
@@ -470,7 +471,12 @@ function PushModal({ institutions, onClose, onPushed }) {
   const submit = async () => {
     setBusy(true)
     const names = institutions.filter(i => targets.includes(i.id)).map(i => i.name)
-    onPushed(await pushConfig({ deviceCount: count, targetLabel: targets.length === institutions.length ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0] }))
+    try {
+      onPushed(await pushConfig({ deviceCount: count, institutionIds: targets, targetLabel: targets.length === institutions.length ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0] }))
+    } catch (e) {
+      alert(e?.response?.data?.detail || 'Push failed. Please try again.')
+      onClose()
+    }
   }
   return (
     <Modal title="Push browser policy" onClose={onClose} width={560}>
