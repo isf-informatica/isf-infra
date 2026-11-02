@@ -28,7 +28,7 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | Issue Manager | `/modules/issues` | ✅ Complete (Module 4) | Live | ✅ | ✅ 22/22 (real frontend code) | Team list = asli active users; screenshots server par (JPG/PNG/WebP, 2 MB, max 6) |
 | Asset Manager | `/modules/assets` | ✅ Complete (Module 5) | Live | ✅ | ✅ 24/24 (real frontend code) | Depreciation server par; form preview server formula se match (1 paisa tak) |
 | Account Manager | `/modules/accounts` | ✅ Complete (Module 6) | Live | ✅ | ✅ 24/24 (real frontend code) | Next invoice no. server se; duplicate invoice no. blocked; paise ki precision fix (DOUBLE) |
-| Digital Organizer | `/modules/organizer` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
+| Digital Organizer | `/modules/organizer` | ✅ Complete (Module 7) | Live | ✅ | ✅ 21/21 (real frontend code) | Har login ka data private; "Today" browser ki local date (IST) se |
 | Digital Signboard | `/modules/signage` | 🔴 Demo only | Demo | ❌ | — | Backend banana hai |
 | InfraDRM | `/modules/drm` | 🔴 Demo only | Demo | ❌ | — | Backend banana hai |
 | VAPT | `/modules/vapt` | 🔴 Demo only | Demo | ❌ | — | Mock findings, koi scan nahi hota |
@@ -52,7 +52,7 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 
 ## 3. Deploy / pending actions (aapki taraf se)
 
-- [ ] Latest `easyreach/main.py` (Module 1 + 2 + 3 + money precision fix) DigitalOcean par deploy — pehli start par 16 money columns FLOAT → DOUBLE auto-convert honge (data safe)
+- [ ] Latest `easyreach/main.py` (Module 1 + 2 + 3 + money precision fix + organizer today-date) DigitalOcean par deploy — pehli start par 16 money columns FLOAT → DOUBLE auto-convert honge (data safe)
 - [ ] Frontend `main` build karke infrapoint par upload
 - [ ] MBSE PCs (IOE-TNPLAB, DESKTOP-QK34H3A) par naya agent ZIP install — bina iske Policy/Browser push "agent purana hai" fail dikhayega
 - [ ] DigitalOcean env check: `EASYREACH_SECRET_KEY`, `LICENSE_CRON_SECRET` set hain
@@ -75,4 +75,5 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | 2 Nov 2026 | Module 3: Visitor Management live (frontend demo → backend) |
 | 2 Nov 2026 | Module 4: Issue Manager live (frontend demo → backend, koi backend change nahi) |
 | 2 Nov 2026 | Module 5: Asset Manager live (frontend demo → backend, koi backend change nahi) |
+| 2 Nov 2026 | Module 7: Digital Organizer live; backend `/organizer/today?date=` (IST midnight fix) |
 | 2 Nov 2026 | Module 6: Account Manager live; backend money precision bug fix (FLOAT ≈7 digit → DOUBLE, ₹12,34,567.89 pehle ₹12,34,570 save hota tha) |

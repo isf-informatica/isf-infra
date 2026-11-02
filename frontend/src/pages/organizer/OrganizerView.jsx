@@ -216,7 +216,7 @@ function NoteModal({ note, onClose, onSaved, onDeleted }) {
         <div className="flex gap-2">
           {note.id && <Btn variant="danger" icon="ti-trash" onClick={async () => { await deleteNote(note.id); onDeleted() }}>Delete</Btn>}
           <Btn onClick={onClose}>Cancel</Btn>
-          <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.title.trim() && !f.body.trim()} onClick={async () => { setBusy(true); await saveNote(f); onSaved() }}>Save</Btn>
+          <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.title.trim() && !f.body.trim()} onClick={async () => { setBusy(true); try { await saveNote(f); onSaved() } catch (e) { setBusy(false); alert(e.message) } }}>Save</Btn>
         </div>
       </div>
     </Modal>
@@ -295,7 +295,7 @@ function TaskModal({ task, onClose, onSaved }) {
       <Field label="Notes (optional)"><textarea value={f.notes || ''} onChange={e => set('notes', e.target.value)} rows={3} className="mk-input w-full text-[13px] px-3 py-2 rounded-xl" style={textareaStyle} /></Field>
       <div className="flex justify-end gap-2 pt-2">
         <Btn onClick={onClose}>Cancel</Btn>
-        <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.title.trim()} onClick={async () => { setBusy(true); await saveTask(f); onSaved() }}>Save task</Btn>
+        <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.title.trim()} onClick={async () => { setBusy(true); try { await saveTask(f); onSaved() } catch (e) { setBusy(false); alert(e.message) } }}>Save task</Btn>
       </div>
     </Modal>
   )
@@ -425,7 +425,7 @@ function EventModal({ ev, onClose, onSaved, onDeleted }) {
         <div>{ev.id && <Btn variant="danger" icon="ti-trash" onClick={async () => { await deleteEvent(ev.id); onDeleted() }}>Delete</Btn>}</div>
         <div className="flex gap-2">
           <Btn onClick={onClose}>Cancel</Btn>
-          <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.title.trim() || !f.date} onClick={async () => { setBusy(true); onSaved(await saveEvent(f)) }}>Save event</Btn>
+          <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.title.trim() || !f.date} onClick={async () => { setBusy(true); try { onSaved(await saveEvent(f)) } catch (e) { setBusy(false); alert(e.message) } }}>Save event</Btn>
         </div>
       </div>
     </Modal>
