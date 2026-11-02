@@ -113,7 +113,7 @@ export default function SmartSetup() {
         ...form,
         aws_folders: form.aws_folders.split(',').map(f => f.trim()).filter(Boolean),
       }
-      const res = await api.post('/api/setup/generate-setup', payload, { responseType: 'blob' })
+      const res = await api.post('/easyreach/setup/generate-setup', payload, { responseType: 'blob' })
 
       const sid = res.headers['x-school-id']
       if (sid) setSchoolId(parseInt(sid))
