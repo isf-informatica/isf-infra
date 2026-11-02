@@ -204,7 +204,7 @@ function BookModal({ heads, onHeads, onClose, onSaved }) {
     const list = await addHead(newHead)
     onHeads(list); set('expense_head', newHead.trim()); setNewHead('')
   }
-  const save = async () => { setBusy(true); onSaved(await createBook(f)) }
+  const save = async () => { setBusy(true); try { onSaved(await createBook(f)) } catch (e) { setBusy(false); alert(e.message) } }
 
   return (
     <Modal title="Add account entry" onClose={onClose} width={600}>
@@ -257,7 +257,7 @@ function PaymentModal({ title, due, onClose, onPay }) {
       <Field label="Amount (₹)"><Input type="number" min="0" max={due} value={amt} onChange={e => setAmt(e.target.value)} /></Field>
       <div className="flex justify-end gap-2 pt-2">
         <Btn onClick={onClose}>Cancel</Btn>
-        <Btn variant="accent" icon="ti-check" loading={busy} disabled={!(Number(amt) > 0)} onClick={async () => { setBusy(true); await onPay(Math.min(Number(amt), due)) }}>Record</Btn>
+        <Btn variant="accent" icon="ti-check" loading={busy} disabled={!(Number(amt) > 0)} onClick={async () => { setBusy(true); await onPay(Math.min(Number(amt), due)); setBusy(false) }}>Record</Btn>
       </div>
     </Modal>
   )
@@ -337,7 +337,7 @@ function BillsTab({ toast, onChange }) {
         onDelete={async (r) => { if (!window.confirm(`Delete bill from ${r.vendor_name}?`)) return; setBusy(r.id); await deleteBill(r.id); setBusy(null); load(); onChange(); toast(`Deleted — ${r.vendor_name}`) }} />
       {adding && <BillModal heads={heads} onClose={() => setAdding(false)} onSaved={(r) => { setAdding(false); load(); onChange(); toast(`Bill added — ${r.vendor_name}`) }} />}
       {paying && <PaymentModal title={`Pay ${paying.r.vendor_name}`} due={paying.due} onClose={() => setPaying(null)}
-        onPay={async (amt) => { await payBill(paying.r.id, amt); setPaying(null); load(); onChange(); toast(`Payment recorded — ${inr(amt)}`) }} />}
+        onPay={async (amt) => { try { await payBill(paying.r.id, amt); setPaying(null); load(); onChange(); toast(`Payment recorded — ${inr(amt)}`) } catch (e) { toast(e.message, 'error') } }} />}
     </>
   )
 }
@@ -364,7 +364,7 @@ function BillModal({ heads, onClose, onSaved }) {
       </Field>
       <div className="flex justify-end gap-2 pt-2">
         <Btn onClick={onClose}>Cancel</Btn>
-        <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.vendor_name.trim() || !(Number(f.bill_amount) > 0)} onClick={async () => { setBusy(true); onSaved(await createBill(f)) }}>Save bill</Btn>
+        <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.vendor_name.trim() || !(Number(f.bill_amount) > 0)} onClick={async () => { setBusy(true); try { onSaved(await createBill(f)) } catch (e) { setBusy(false); alert(e.message) } }}>Save bill</Btn>
       </div>
     </Modal>
   )
@@ -387,7 +387,7 @@ function InvoicesTab({ toast, onChange }) {
         onDelete={async (r) => { if (!window.confirm(`Delete invoice ${r.invoice_no}?`)) return; setBusy(r.id); await deleteInvoice(r.id); setBusy(null); load(); onChange(); toast(`Deleted — ${r.invoice_no}`) }} />
       {adding && <InvoiceModal onClose={() => setAdding(false)} onSaved={(r) => { setAdding(false); load(); onChange(); toast(`Invoice raised — ${r.invoice_no}`) }} />}
       {paying && <PaymentModal title={`Receive ${paying.r.invoice_no}`} due={paying.due} onClose={() => setPaying(null)}
-        onPay={async (amt) => { await receiveInvoice(paying.r.id, amt); setPaying(null); load(); onChange(); toast(`Receipt recorded — ${inr(amt)}`) }} />}
+        onPay={async (amt) => { try { await receiveInvoice(paying.r.id, amt); setPaying(null); load(); onChange(); toast(`Receipt recorded — ${inr(amt)}`) } catch (e) { toast(e.message, 'error') } }} />}
     </>
   )
 }
@@ -416,7 +416,7 @@ function InvoiceModal({ onClose, onSaved }) {
       <div className="flex justify-end gap-2 pt-4">
         <Btn onClick={onClose}>Cancel</Btn>
         <Btn variant="accent" icon="ti-device-floppy" loading={busy} disabled={!f.invoice_no.trim() || !f.buyer_details.trim() || !(Number(f.invoice_amount) > 0)}
-          onClick={async () => { setBusy(true); onSaved(await createInvoice({ ...f, narration: f.narration || suggestNarration({ type: 'Income', party: f.buyer_details, head: f.amount_details, amount: total, date: f.invoice_date }) })) }}>Raise invoice</Btn>
+          onClick={async () => { setBusy(true); try { onSaved(await createInvoice({ ...f, narration: f.narration || suggestNarration({ type: 'Income', party: f.buyer_details, head: f.amount_details, amount: total, date: f.invoice_date }) })) } catch (e) { setBusy(false); alert(e.message) } }}>Raise invoice</Btn>
       </div>
     </Modal>
   )
