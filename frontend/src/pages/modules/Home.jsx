@@ -235,6 +235,15 @@ export default function Home() {
 
       <div style={{ minHeight: 'calc(100vh - 73px)' }}>
         <div className="px-7 py-8">
+          {/* Back to the public InfraPoint site (all modules overview) */}
+          <button onClick={() => navigate('/')}
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold mb-4 cursor-pointer bg-transparent border-none p-0"
+            style={{ color: C.textSecondary }}
+            onMouseEnter={e => { e.currentTarget.style.color = C.textPrimary }}
+            onMouseLeave={e => { e.currentTarget.style.color = C.textSecondary }}>
+            <i className="ti ti-arrow-left text-[14px]" aria-hidden="true"></i>
+            Back to InfraPoint home
+          </button>
           <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>ISF Infra</p>
           <h1 className="text-[24px] font-extrabold tracking-tight mt-1" style={{ color: C.textPrimary }}>
             Welcome{user?.name ? `, ${user.name}` : ''}

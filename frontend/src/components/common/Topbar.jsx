@@ -9,7 +9,8 @@ export default function Topbar({ C }) {
 
   return (
     <div className="flex items-center justify-between px-7 py-4" style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
-      <div className="flex items-center gap-3">
+      {/* Logo click = back to all modules (/home) from any page */}
+      <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/home')} title="All modules">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
           <i className="ti ti-server-2 text-white text-lg" aria-hidden="true"></i>
         </div>
