@@ -259,8 +259,10 @@ function AssetModal({ asset, onClose, onSaved }) {
   const save = async () => {
     setBusy(true)
     const payload = { ...f, quantity: Number(f.quantity) || 1, acquisition_cost: Number(f.acquisition_cost) || 0, depreciation_rate: Number(f.depreciation_rate) || 0 }
-    const saved = asset ? await updateAsset(asset.asset_id, payload) : await createAsset(payload)
-    onSaved(saved, !asset)
+    try {
+      const saved = asset ? await updateAsset(asset.asset_id, payload) : await createAsset(payload)
+      onSaved(saved, !asset)
+    } catch (e) { setBusy(false); alert(e.message) }
   }
 
   return (
@@ -399,10 +401,12 @@ function LedgerModal({ kind, onClose, onSaved }) {
   const set = (k, v) => setF(x => ({ ...x, [k]: v }))
   const save = async () => {
     setBusy(true)
-    const row = isL
-      ? await createLiability({ description: f.description, amount: f.amount, due_date: f.date || null, is_current: f.is_current })
-      : await createEquity({ description: f.description, amount: f.amount, recorded_date: f.date || null })
-    onSaved(row)
+    try {
+      const row = isL
+        ? await createLiability({ description: f.description, amount: f.amount, due_date: f.date || null, is_current: f.is_current })
+        : await createEquity({ description: f.description, amount: f.amount, recorded_date: f.date || null })
+      onSaved(row)
+    } catch (e) { setBusy(false); alert(e.message) }
   }
   return (
     <Modal title={isL ? 'Add liability' : 'Add equity'} onClose={onClose} width={480}>
