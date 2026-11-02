@@ -145,7 +145,7 @@ function RegisterTab({ toast, onDone }) {
     try {
       const v = await registerVisitor(f)
       setF(EMPTY); toast(`Checked in — ${v.visitor_name} · ${passNo(v)}`); onDone(v)
-    } catch { toast('Could not save — photo may be too large for demo storage', 'error') }
+    } catch (e) { toast(e?.message || 'Could not save visitor', 'error') }
     setBusy(false)
   }
 

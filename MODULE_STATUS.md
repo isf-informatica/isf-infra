@@ -24,7 +24,7 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | Support / Service Desk | `/support` | ✅ Complete | Live | ✅ | ✅ E2E | Requester → assign → complete → verify flow |
 | License Manager | `/license` | ✅ Complete | Live | ✅ | ✅ E2E | Access sirf `yash@isf.com` email (hardcoded allowlist) |
 | InfraDC (MDM) | `/mdm` | 🟠 Partial | Mixed | Mixed | — | Category-wise status neeche section 2 mein |
-| Visitor Management | `/modules/visitors` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
+| Visitor Management | `/modules/visitors` | ✅ Complete (Module 3) | Live | ✅ | ✅ 23/23 (real frontend code) | Photo server par upload; "Pass expired" log active visitors se nikalta hai; host email/SMS abhi nahi jaata |
 | Issue Manager | `/modules/issues` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
 | Asset Manager | `/modules/assets` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
 | Account Manager | `/modules/accounts` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
@@ -52,7 +52,7 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 
 ## 3. Deploy / pending actions (aapki taraf se)
 
-- [ ] Latest `easyreach/main.py` (Module 1 + 2) DigitalOcean par deploy
+- [ ] Latest `easyreach/main.py` (Module 1 + 2 + 3) DigitalOcean par deploy
 - [ ] Frontend `main` build karke infrapoint par upload
 - [ ] MBSE PCs (IOE-TNPLAB, DESKTOP-QK34H3A) par naya agent ZIP install — bina iske Policy/Browser push "agent purana hai" fail dikhayega
 - [ ] DigitalOcean env check: `EASYREACH_SECRET_KEY`, `LICENSE_CRON_SECRET` set hain
@@ -72,3 +72,4 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | 2 Nov 2026 | SmartSetup API path fix; MDM hub + Home par back buttons; logo → all modules |
 | 2 Nov 2026 | Module 1: Policy Management live (real PCs) |
 | 2 Nov 2026 | Module 2: Secure Browser live (Chrome + Edge) |
+| 2 Nov 2026 | Module 3: Visitor Management live (frontend demo → backend) |

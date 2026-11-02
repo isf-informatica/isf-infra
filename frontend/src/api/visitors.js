@@ -1,22 +1,18 @@
-import { latency, uid, minsAgo, clone, currentUser, createStore, toCsvBlob } from './mdmDemoStore'
+import api from './axios'
+import { toCsvBlob } from './mdmDemoStore'
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Visitor Management API layer.
+   Visitor Management API layer — LIVE (EasyReach backend /easyreach/visitors).
 
-   Ported from easylearnv3 (mbse branch):
-     • app/Controllers/Visitor_Controller.php  (register_visitor,
-       get_active_visitors, checkout_visitor, get_visit_history,
-       get_security_logs, get_visitor, delete_visitor)
-     • app/Models/Visitor_Model.php            (el_visitors,
-       el_visitor_security_logs)
-     • app/Views/Easylearn/visitor_*.php       (register, active, history,
-       report, security logs, gate pass)
-
-   ⚠️ DEMO MODE — the isf-infra backend has no visitor endpoints yet. Each
-   function keeps the same async signature a real call would have; replace
-   the body with the commented endpoint above it (mbse route names) when
-   wired in. The page (pages/visitors/VisitorView.jsx) does not need any change.
-   Reset demo data: localStorage.removeItem('easyreach_visitors_store_v1')
+   Ported from easylearnv3 (mbse branch) Visitor_Controller / Visitor_Model.
+   Same function names/shapes as the old demo layer, so VisitorView.jsx is
+   unchanged. Differences handled here:
+     • photo is uploaded as a real file (multipart) and fetched back with the
+       login token (cached as a data URL so <img> and the printed gate pass work)
+     • backend names → page names: done_by_name → done_by,
+       registered_by_name → registered_by
+     • "Pass expired" log rows are derived from active visitors whose gate pass
+       has run out (backend logs only check-in / check-out / cancel)
    ───────────────────────────────────────────────────────────────────────────── */
 
 // Same option lists as visitor_register.php
@@ -52,156 +48,86 @@ export const durationMins = (v) => {
   return Math.max(0, Math.round((end - new Date(v.check_in_time)) / 60000))
 }
 
-const hoursFrom = (iso, h) => new Date(new Date(iso).getTime() + h * 3600000).toISOString()
+const B = '/easyreach/visitors'
+const d = (res) => res.data?.data ?? res.data
 
-const seed = () => {
-  // [name, phone, purpose, host, dept, site, minsAgoIn, passHours, outAfterMins|null|'cancel']
-  const rows = [
-    ['Rohan Mehta', '98200 41123', 'Parent Visit', 'Mrs. Kulkarni', 'Academics', 'MBSE School', 35, 2, null],
-    ['Blue Dart Courier', '99300 77812', 'Delivery', 'Front Office', 'Administration', 'MBSE School', 12, 1, null],
-    ['Sneha Rao', '97690 22018', 'Interview', 'Mr. Deshpande', 'Principal Office', 'MBSE School', 95, 2, null],
-    ['Ankit Sharma', '98190 55021', 'Official Work', 'IT Team', 'IT', 'ISF Head Office', 300, 4, null],
-    ['Priya Nair', '90040 11290', 'Meeting', 'Accounts Head', 'Accounts', 'Pimpri Chinchwad University', 180, 2, 70],
-    ['Vikram Joshi', '98700 63344', 'Parent Visit', 'Class Teacher 7B', 'Academics', 'MET School Nashik', 60 * 26, 1, 40],
-    ['Swiggy Genie', '91520 90031', 'Delivery', 'Canteen', 'Administration', 'MBSE School', 60 * 27, 1, 8],
-    ['Dr. Farah Khan', '98211 30470', 'Meeting', 'Principal', 'Principal Office', 'MBSE School', 60 * 50, 4, 95],
-    ['Rahul Patil', '99870 12555', 'Interview', 'HR', 'Administration', 'ISF Head Office', 60 * 74, 2, 55],
-    ['Meera Iyer', '98330 44781', 'Official Work', 'Transport In-charge', 'Transport', 'MBSE School', 60 * 98, 8, 210],
-    ['Kunal Verma', '90290 66412', 'Meeting', 'Admissions Desk', 'Admissions', 'Pimpri Chinchwad University', 60 * 120, 2, 'cancel'],
-  ]
-  const visitors = rows.map(([name, phone, purpose, host, dept, site, inMins, hours, out], i) => {
-    const check_in_time = minsAgo(inMins)
-    const id = 2041 + i
-    const v = {
-      id, visitor_name: name, visitor_phone: phone, visitor_email: '', purpose,
-      id_proof_type: ID_PROOFS[i % ID_PROOFS.length], id_proof_no: `XXXX-${String(4100 + i * 37).slice(-4)}`,
-      host_name: host, host_email: '', host_department: dept, site, remarks: '',
-      check_in_time, visit_date: check_in_time.slice(0, 10), gate_pass_expiry: hoursFrom(check_in_time, hours),
-      check_out_time: typeof out === 'number' ? hoursFrom(check_in_time, out / 60) : null,
-      status: out === 'cancel' ? 'cancelled' : typeof out === 'number' ? 'checked_out' : 'active',
-      visitor_photo: null, registered_by: i % 2 ? 'Security Desk' : 'Front Office', visitor_mobile_notified: i % 3 === 0,
-    }
-    return v
-  })
-  const logs = []
-  visitors.forEach(v => {
-    logs.push({ id: uid('sl'), visitor_id: v.id, event_type: 'CHECK_IN', event_desc: `Visitor checked in: ${v.visitor_name}`, done_by: v.registered_by, event_time: v.check_in_time })
-    if (v.status === 'checked_out') logs.push({ id: uid('sl'), visitor_id: v.id, event_type: 'CHECK_OUT', event_desc: `Visitor checked out: ${v.visitor_name}`, done_by: 'Security Desk', event_time: v.check_out_time })
-    if (v.status === 'cancelled') logs.push({ id: uid('sl'), visitor_id: v.id, event_type: 'CANCELLED', event_desc: `Visit cancelled: ${v.visitor_name}`, done_by: 'Front Office', event_time: hoursFrom(v.check_in_time, 0.2) })
-  })
-  return { visitors, logs }
-}
-
-const store = createStore('easyreach_visitors_store_v1', seed)
-const S = () => store.get()
-const log = (visitor, event_type, event_desc) => store.set(s => {
-  s.logs.unshift({ id: uid('sl'), visitor_id: visitor.id, event_type, event_desc, done_by: currentUser(), event_time: new Date().toISOString() })
+/* ── photos: fetched with the auth token, cached per visitor as a data URL ── */
+const photoCache = new Map()
+const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
+  const r = new FileReader()
+  r.onload = () => resolve(r.result)
+  r.onerror = () => reject(new Error('Could not read photo'))
+  r.readAsDataURL(blob)
 })
-const withName = (l) => {
-  const v = S().visitors.find(x => x.id === l.visitor_id)
-  return { ...l, visitor_name: v?.visitor_name || '—', visitor_phone: v?.visitor_phone || '' }
+async function loadPhoto(id) {
+  if (photoCache.has(id)) return photoCache.get(id)
+  try {
+    const res = await api.get(`${B}/${id}/file/photo`, { responseType: 'blob' })
+    const url = await blobToDataUrl(res.data)
+    photoCache.set(id, url)
+    return url
+  } catch {
+    photoCache.set(id, null)
+    return null
+  }
 }
-
-/* Logs a one-time PASS_EXPIRED event for any active visitor whose pass has run out. */
-function sweepExpired() {
-  const s = S()
-  s.visitors.forEach(v => {
-    if (passState(v) === 'expired' && !s.logs.some(l => l.visitor_id === v.id && l.event_type === 'PASS_EXPIRED')) {
-      store.set(st => { st.logs.unshift({ id: uid('sl'), visitor_id: v.id, event_type: 'PASS_EXPIRED', event_desc: `Gate pass expired, still on premises: ${v.visitor_name}`, done_by: 'System', event_time: v.gate_pass_expiry }) })
-    }
-  })
+const toPage = (v) => ({ ...v, registered_by: v.registered_by_name || '', visitor_photo: photoCache.get(v.id) || null })
+async function withPhotos(rows, max = 60) {
+  await Promise.all(rows.slice(0, max).filter(v => v.has_photo).map(v => loadPhoto(v.id)))
+  return rows.map(toPage)
 }
 
 /* ── Summary (visitor_management.php cards + visitor_report.php stats) ── */
-export const getVisitorSummary = async () => {
-  await latency()
-  sweepExpired()
-  const s = S()
-  const today = new Date().toISOString().slice(0, 10)
-  const todays = s.visitors.filter(v => v.visit_date === today)
-  const active = s.visitors.filter(v => v.status === 'active')
-  const done = s.visitors.filter(v => v.status === 'checked_out')
-  const byPurpose = {}
-  s.visitors.filter(v => v.status !== 'cancelled').forEach(v => { byPurpose[v.purpose] = (byPurpose[v.purpose] || 0) + 1 })
-  const days = []
-  for (let k = 6; k >= 0; k--) {
-    const d = new Date(Date.now() - k * 86400000)
-    const key = d.toISOString().slice(0, 10)
-    days.push({ key, label: d.toLocaleDateString('en-IN', { weekday: 'short' }), count: s.visitors.filter(v => v.visit_date === key && v.status !== 'cancelled').length })
-  }
-  return {
-    today: todays.filter(v => v.status !== 'cancelled').length,
-    onPremises: active.length,
-    expired: active.filter(v => passState(v) === 'expired').length,
-    checkedOutToday: todays.filter(v => v.status === 'checked_out').length,
-    total: s.visitors.length,
-    avgMins: done.length ? Math.round(done.reduce((t, v) => t + durationMins(v), 0) / done.length) : 0,
-    byPurpose: Object.entries(byPurpose).sort((a, b) => b[1] - a[1]),
-    days,
-  }
-}
+// GET /easyreach/visitors/summary
+export const getVisitorSummary = async () => (await api.get(`${B}/summary`)).data
 
 /* ── Register ── */
-// POST register_visitor  (multipart: visitor_* fields, host_*, gate_pass_hours, visitor_photo, id_proof_photo, notify_visitor)
+// POST /easyreach/visitors  (multipart: visitor_* fields, host_*, gate_pass_hours, visitor_photo, notify_visitor)
 export const registerVisitor = async (data) => {
-  await latency(500, 900)
-  const now = new Date().toISOString()
-  const v = {
-    id: Math.max(2040, ...S().visitors.map(x => x.id)) + 1,
-    visitor_name: data.visitor_name.trim(), visitor_phone: data.visitor_phone.trim(), visitor_email: data.visitor_email || '',
-    purpose: data.purpose, id_proof_type: data.id_proof_type || '', id_proof_no: data.id_proof_no || '',
-    host_name: data.host_name || '', host_email: data.host_email || '', host_department: data.host_department || '',
-    site: data.site, remarks: data.remarks || '',
-    check_in_time: now, visit_date: now.slice(0, 10), gate_pass_expiry: hoursFrom(now, Number(data.gate_pass_hours) || 4),
-    check_out_time: null, status: 'active', visitor_photo: data.visitor_photo || null,
-    registered_by: currentUser(), visitor_mobile_notified: !!data.notify_visitor,
+  const fd = new FormData()
+  const fields = ['visitor_name', 'visitor_phone', 'visitor_email', 'purpose', 'id_proof_type', 'id_proof_no',
+    'host_name', 'host_email', 'host_department', 'site', 'remarks', 'gate_pass_hours']
+  fields.forEach(k => fd.append(k, data[k] == null ? '' : String(data[k]).trim()))
+  fd.append('notify_visitor', data.notify_visitor ? '1' : '0')
+  if (data.visitor_photo) {
+    const blob = await (await fetch(data.visitor_photo)).blob()
+    const ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg')
+    fd.append('visitor_photo', blob, `photo.${ext}`)
   }
-  store.set(s => { s.visitors.unshift(v) })
-  log(v, 'CHECK_IN', `Visitor checked in: ${v.visitor_name}`)
-  return clone(v)
+  try {
+    const v = d(await api.post(B, fd, { headers: { 'Content-Type': 'multipart/form-data' } }))
+    if (data.visitor_photo) photoCache.set(v.id, data.visitor_photo)
+    return toPage(v)
+  } catch (e) {
+    throw new Error(e?.response?.data?.detail || 'Could not register visitor', { cause: e })
+  }
 }
 
 /* ── Active ── */
-// POST get_active_visitors
-export const getActiveVisitors = async () => {
-  await latency(200, 400)
-  sweepExpired()
-  return clone(S().visitors.filter(v => v.status === 'active')).sort((a, b) => b.check_in_time.localeCompare(a.check_in_time))
-}
+// GET /easyreach/visitors/active
+export const getActiveVisitors = async () => withPhotos(d(await api.get(`${B}/active`)))
 
-// POST checkout_visitor  { visitor_id }
-export const checkoutVisitor = async (id) => {
-  await latency(300, 600)
-  let v
-  store.set(s => { v = s.visitors.find(x => x.id === id); v.status = 'checked_out'; v.check_out_time = new Date().toISOString() })
-  log(v, 'CHECK_OUT', `Visitor checked out: ${v.visitor_name}`)
-  return clone(v)
-}
+// POST /easyreach/visitors/{id}/checkout
+export const checkoutVisitor = async (id) => toPage(d(await api.post(`${B}/${id}/checkout`)))
 
-// POST delete_visitor  { visitor_id }  (soft delete → status 'cancelled')
-export const cancelVisitor = async (id) => {
-  await latency(300, 600)
-  let v
-  store.set(s => { v = s.visitors.find(x => x.id === id); v.status = 'cancelled' })
-  log(v, 'CANCELLED', `Visit cancelled: ${v.visitor_name}`)
-  return clone(v)
-}
+// POST /easyreach/visitors/{id}/cancel   (soft delete → status 'cancelled')
+export const cancelVisitor = async (id) => toPage(d(await api.post(`${B}/${id}/cancel`)))
 
-// POST get_visitor  { visitor_id }
-export const getVisitor = async (id) => { await latency(150, 300); return clone(S().visitors.find(v => v.id === id) || null) }
+// GET /easyreach/visitors/{id}
+export const getVisitor = async (id) => {
+  try {
+    const v = d(await api.get(`${B}/${id}`))
+    if (v.has_photo) await loadPhoto(v.id)
+    return toPage(v)
+  } catch { return null }
+}
 
 /* ── History / report ── */
-// POST get_visit_history  { date_from, date_to, search }
-export const getVisitHistory = async ({ from, to, search } = {}) => {
-  await latency()
-  const q = (search || '').trim().toLowerCase()
-  return clone(S().visitors.filter(v => (!from || v.visit_date >= from) && (!to || v.visit_date <= to)
-    && (!q || `${v.visitor_name} ${v.visitor_phone} ${v.host_name}`.toLowerCase().includes(q))))
-    .sort((a, b) => b.check_in_time.localeCompare(a.check_in_time))
-}
+// GET /easyreach/visitors/history?date_from&date_to&search
+export const getVisitHistory = async ({ from, to, search } = {}) =>
+  withPhotos(d(await api.get(`${B}/history`, { params: { date_from: from || undefined, date_to: to || undefined, search: search || undefined } })))
 
 export const exportVisits = async (rows) => {
-  await latency(300, 600)
   const fmt = (d) => d ? new Date(d).toLocaleString('en-IN') : ''
   return toCsvBlob(['Gate pass', 'Visitor', 'Phone', 'Purpose', 'Host', 'Department', 'Site', 'Check-in', 'Check-out', 'Duration (min)', 'Status', 'Registered by'],
     rows.map(v => [passNo(v), v.visitor_name, v.visitor_phone, v.purpose, v.host_name, v.host_department, v.site, fmt(v.check_in_time), fmt(v.check_out_time),
@@ -209,18 +135,27 @@ export const exportVisits = async (rows) => {
 }
 
 /* ── Security logs ── */
-// POST get_security_logs  { date_from, date_to }
+// GET /easyreach/visitors/logs?date_from&date_to   (+ derived "Pass expired" rows)
 export const getSecurityLogs = async ({ from, to } = {}) => {
-  await latency()
-  sweepExpired()
-  return S().logs.filter(l => { const d = l.event_time.slice(0, 10); return (!from || d >= from) && (!to || d <= to) })
-    .map(withName).sort((a, b) => b.event_time.localeCompare(a.event_time))
+  const [logs, active] = await Promise.all([
+    d(await api.get(`${B}/logs`, { params: { date_from: from || undefined, date_to: to || undefined } })),
+    d(await api.get(`${B}/active`)),
+  ])
+  const rows = logs.map(l => ({ ...l, done_by: l.done_by_name || 'System' }))
+  active.filter(v => passState(v) === 'expired').forEach(v => {
+    const day = v.gate_pass_expiry.slice(0, 10)
+    if ((!from || day >= from) && (!to || day <= to)) {
+      rows.push({ id: `exp_${v.id}`, visitor_id: v.id, event_type: 'PASS_EXPIRED', event_desc: `Gate pass expired, still on premises: ${v.visitor_name}`,
+        done_by: 'System', event_time: v.gate_pass_expiry, visitor_name: v.visitor_name, visitor_phone: v.visitor_phone })
+    }
+  })
+  return rows.sort((a, b) => b.event_time.localeCompare(a.event_time))
 }
 
-/* Visitor photo is kept as a small data URL in demo mode (images only, ≤ 300 KB). */
+/* Visitor photo — read as a data URL for preview, uploaded as a file on register (images only, ≤ 2 MB). */
 export const readPhoto = (file) => new Promise((resolve, reject) => {
-  if (!file.type.startsWith('image/')) return reject(new Error('Only image files are allowed'))
-  if (file.size > 300 * 1024) return reject(new Error('Photo must be under 300 KB in demo mode'))
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return reject(new Error('Only JPG, PNG or WebP photos are allowed'))
+  if (file.size > 2 * 1024 * 1024) return reject(new Error('Photo must be under 2 MB'))
   const r = new FileReader()
   r.onload = () => resolve(r.result)
   r.onerror = () => reject(new Error('Could not read the photo'))
