@@ -267,7 +267,8 @@ function ReportModal({ onClose, onSaved, toast }) {
 
   const addFiles = async (files) => {
     for (const file of Array.from(files)) {
-      try { const shot = await readScreenshot(file); setF(x => ({ ...x, screenshots: [...x.screenshots, shot] })) }
+      if (f.screenshots.length >= 6) { toast('Maximum 6 screenshots allowed', 'error'); break }
+      try { const shot = await readScreenshot(file); setF(x => ({ ...x, screenshots: x.screenshots.length >= 6 ? x.screenshots : [...x.screenshots, shot] })) }
       catch (e) { toast(e.message, 'error') }
     }
   }
@@ -308,7 +309,7 @@ function ReportModal({ onClose, onSaved, toast }) {
         <Btn variant="accent" icon="ti-send" loading={busy} disabled={!f.title.trim() || !f.description.trim()}
           onClick={async () => {
             setBusy(true)
-            try { onSaved(await reportIssue(f)) } catch { setBusy(false); toast('Could not save — screenshots may be too large for demo storage', 'error') }
+            try { onSaved(await reportIssue(f)) } catch (e) { setBusy(false); toast(e?.message || 'Could not save issue', 'error') }
           }}>Submit issue</Btn>
       </div>
     </Modal>
@@ -351,8 +352,10 @@ function IssueDetail({ id, onClose, toast, onChange }) {
   }
   const move = async (st) => {
     setBusy(st)
-    const updated = await setIssueStatus(issue.id, st, remark.trim())
-    setIssue(updated); setRemark(''); setBusy(null); onChange(); toast(`${issue.id} → ${STATUS[st].label}`)
+    try {
+      const updated = await setIssueStatus(issue.id, st, remark.trim())
+      setIssue(updated); setRemark(''); setBusy(null); onChange(); toast(`${issue.id} → ${STATUS[st].label}`)
+    } catch (e) { setBusy(null); toast(e?.message || 'Could not change status', 'error') }
   }
   const dt = (d) => d ? new Date(d).toLocaleDateString('en-IN', { dateStyle: 'medium' }) : '—'
 

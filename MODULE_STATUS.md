@@ -25,7 +25,7 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | License Manager | `/license` | ✅ Complete | Live | ✅ | ✅ E2E | Access sirf `yash@isf.com` email (hardcoded allowlist) |
 | InfraDC (MDM) | `/mdm` | 🟠 Partial | Mixed | Mixed | — | Category-wise status neeche section 2 mein |
 | Visitor Management | `/modules/visitors` | ✅ Complete (Module 3) | Live | ✅ | ✅ 23/23 (real frontend code) | Photo server par upload; "Pass expired" log active visitors se nikalta hai; host email/SMS abhi nahi jaata |
-| Issue Manager | `/modules/issues` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
+| Issue Manager | `/modules/issues` | ✅ Complete (Module 4) | Live | ✅ | ✅ 22/22 (real frontend code) | Team list = asli active users; screenshots server par (JPG/PNG/WebP, 2 MB, max 6) |
 | Asset Manager | `/modules/assets` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
 | Account Manager | `/modules/accounts` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
 | Digital Organizer | `/modules/organizer` | 🟡 Backend ready, frontend demo | Demo | ✅ | ✅ backend | Wiring baaki |
@@ -73,3 +73,4 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | 2 Nov 2026 | Module 1: Policy Management live (real PCs) |
 | 2 Nov 2026 | Module 2: Secure Browser live (Chrome + Edge) |
 | 2 Nov 2026 | Module 3: Visitor Management live (frontend demo → backend) |
+| 2 Nov 2026 | Module 4: Issue Manager live (frontend demo → backend, koi backend change nahi) |
