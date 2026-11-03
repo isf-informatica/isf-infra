@@ -3,7 +3,7 @@
 Har module ka asli status: frontend live backend se juda hai ya demo (browser localStorage) hai,
 backend bana hai ya nahi, aur test hua ya nahi. Har module complete hone par ye file update hoti hai.
 
-**Last updated:** 2 Nov 2026
+**Last updated:** 3 Nov 2026
 
 **Legend**
 - ✅ **Complete** — frontend live backend se juda, backend tested, (MDM ke liye) asli PC par lagta hai
@@ -46,17 +46,21 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | Real-Time Reports | `/mdm/reports` | 🟠 Partial | — | — | Sirf school counts (total/active/pending/killed) |
 | Data Security & Hardware Restriction | `/schools/1/kill` | 🟠 Partial | ✅ Kill switch | — | School id 1 hardcoded; Level 1 schtasks bug (agent context) pending |
 | Geofencing & Location | `/mdm/geofencing` | 🟠 Partial | ❌ | — | Sirf IP-based approx location + manual correction |
-| App Management | `/mdm/app-management` | 🔴 Demo only | ❌ | — | Backend + agent dono banana hai |
+| App Management | `/mdm/app-management` | ✅ Complete (Module 8) | ✅ Windows: inventory, block (5 sec), silent uninstall, EXE/MSI push, usage | ✅ agent 33/33, E2E 54/54 (local + S3), frontend 25/25 | Whitelist (kiosk) mode Windows par enforce nahi; uninstall sirf MSI / QuietUninstallString wale apps; per-user (HKCU) installs inventory mein nahi; installers S3 par (`S3_BUCKET`), max 500 MB; APK = Android agent nahi |
 | Content Publishing | `/mdm/content-publishing` | 🔴 Demo only | ❌ | — | Backend + file storage + agent banana hai |
 | Groups & Roles | `/mdm/groups-roles` | 🔴 Mock UI | ❌ | — | List-users endpoint chahiye |
 
 ## 3. Deploy / pending actions (aapki taraf se)
 
-- [ ] Latest `easyreach/main.py` (Module 1 + 2 + 3 + money precision fix + organizer today-date) DigitalOcean par deploy — pehli start par 16 money columns FLOAT → DOUBLE auto-convert honge (data safe)
+- [x] `easyreach/main.py` Module 1–7 + money precision + organizer today-date — deployed (2 Nov)
+- [ ] Latest `easyreach/main.py` (Module 8 App Management) DigitalOcean par deploy
 - [ ] Frontend `main` build karke infrapoint par upload
-- [ ] MBSE PCs (IOE-TNPLAB, DESKTOP-QK34H3A) par naya agent ZIP install — bina iske Policy/Browser push "agent purana hai" fail dikhayega
+- [ ] MBSE PCs (IOE-TNPLAB, DESKTOP-QK34H3A) par naya agent ZIP install (Module 8 ke baad wala) — bina iske Policy/Browser/App commands fail dikhayenge
 - [ ] DigitalOcean env check: `EASYREACH_SECRET_KEY`, `LICENSE_CRON_SECRET` set hain
 - [ ] `yash@isf.com` password change (chat mein share hua tha)
+- [ ] 🔴 AWS access key + secret 5 backend files mein hardcoded hai (`ocr_paperchecking`, `aws_upload`, `flipbook`, `isfathena`, `Ebook_genrator`) — key rotate karo, code se hatao, sirf env var use karo
+- [ ] 🔴 DigitalOcean App Platform ki disk har deploy par mit jaati hai: Visitors photos, Issue screenshots, Service Desk attachments abhi wahi disk par hain → har redeploy par gayab. Inhe bhi S3 par shift karna hai (App Management installers already S3 par)
+- [ ] DigitalOcean env check: `S3_BUCKET` + `AWS_ACCESS_KEY_ID` set hain (App Management installers isi bucket mein `easyreach/app-packages/` ke andar jaate hain; set na ho to local disk = redeploy par delete)
 
 ## 4. Open decisions
 
@@ -76,4 +80,5 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | 2 Nov 2026 | Module 4: Issue Manager live (frontend demo → backend, koi backend change nahi) |
 | 2 Nov 2026 | Module 5: Asset Manager live (frontend demo → backend, koi backend change nahi) |
 | 2 Nov 2026 | Module 7: Digital Organizer live; backend `/organizer/today?date=` (IST midnight fix) |
+| 3 Nov 2026 | Module 8: App Management live — backend + PC agent + frontend (pehla module jiska backend scratch se bana) |
 | 2 Nov 2026 | Module 6: Account Manager live; backend money precision bug fix (FLOAT ≈7 digit → DOUBLE, ₹12,34,567.89 pehle ₹12,34,570 save hota tha) |

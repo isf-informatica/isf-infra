@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Topbar from '../../components/common/Topbar'
 import {
-  getInstitutions, getAppSummary, getAppInventory, syncInventory, setAppStatus,
+  getAppTargets, getAppSummary, getAppInventory, syncInventory, setAppStatus,
   getAppRules, setEnforcementMode, createAppRule, deleteAppRule, getViolations,
   getDeployments, uploadPackage, createDeployment, retryDeployment,
   getAppUsage, exportUsageReport,
@@ -205,7 +205,7 @@ export default function AppManagementView() {
 
   useEffect(() => {
     refreshSummary()
-    getInstitutions().then(setInstitutions)
+    getAppTargets().then(setInstitutions).catch(() => setInstitutions([]))
   }, [refreshSummary])
 
   // Heartbeat — keeps the "agents online" indicator and KPIs fresh.
@@ -453,10 +453,9 @@ function InventoryTab({ toast, onChange }) {
     setSyncing(true)
     try {
       const r = await syncInventory()
-      await load()
-      onChange()
-      toast(`Inventory refreshed — ${r.devicesReported} devices reported`)
-    } catch { toast('Sync failed. Try again.', 'error') }
+      toast(`Inventory requested from ${r.devicesQueued} PC${r.devicesQueued === 1 ? '' : 's'} — online PCs report within a minute`)
+      setTimeout(() => { load(); onChange() }, 40000)
+    } catch (e) { toast(e?.message || 'Sync failed. Try again.', 'error') }
     setSyncing(false)
   }
 
@@ -466,10 +465,10 @@ function InventoryTab({ toast, onChange }) {
       const r = await setAppStatus(app.id, next)
       setApps(prev => prev.map(a => a.id === app.id ? r.app : a))
       onChange()
-      if (next === 'blocked') toast(`${app.name} blacklisted — uninstall command queued for ${r.commandQueuedFor} devices`)
-      else toast(`${app.name} marked as allowed`)
+      if (next === 'blocked') toast(`${app.name} blocked — rules sent to all PCs (installed on ${r.commandQueuedFor})`)
+      else toast(`${app.name} marked as ${next === 'review' ? 'needs review' : 'allowed'}`)
       if (detail?.id === app.id) setDetail(r.app)
-    } catch { toast('Could not update app status', 'error') }
+    } catch (e) { toast(e?.message || 'Could not update app status', 'error') }
     setBusyId(null)
   }
 
@@ -619,8 +618,8 @@ function RulesTab({ toast, institutions, onChange }) {
       await setEnforcementMode(mode)
       setData(d => ({ ...d, mode }))
       onChange()
-      toast(mode === 'whitelist' ? 'Whitelist mode active — only approved apps can run' : 'Blacklist mode active — everything except blocked apps can run')
-    } catch { toast('Could not change mode', 'error') }
+      toast(mode === 'whitelist' ? 'Whitelist mode saved — not enforced on Windows PCs yet; blacklist rules still apply' : 'Blacklist mode active — everything except blocked apps can run')
+    } catch (e) { toast(e?.message || 'Could not change mode', 'error') }
     setSwitching(false)
   }
 
@@ -640,7 +639,7 @@ function RulesTab({ toast, institutions, onChange }) {
   const rules = data.rules.filter(r => filter === 'all' || r.type === filter)
   const modes = [
     { key: 'blacklist', title: 'Blacklist mode', desc: 'All apps allowed except the ones you block. Best for general classroom devices.', icon: 'ti-shield-x', color: C.danger, bg: C.dangerBg, border: C.dangerBorder },
-    { key: 'whitelist', title: 'Whitelist mode (kiosk)', desc: 'Only approved apps can be opened. Best for exam labs & interactive panels.', icon: 'ti-shield-check', color: C.success, bg: C.successBg, border: C.successBorder },
+    { key: 'whitelist', title: 'Whitelist mode (kiosk)', desc: 'Only approved apps can be opened. Saved for the Android agent — not enforced on Windows PCs yet.', icon: 'ti-shield-check', color: C.success, bg: C.successBg, border: C.successBorder },
   ]
 
   return (
@@ -893,7 +892,8 @@ function DeployTab({ toast, institutions, onChange }) {
 }
 
 // Approximate enrolled-device counts per institution for target sizing.
-const deviceCountFor = (inst) => 40 + ((String(inst.name).length * 37 + Number(inst.id || 1) * 13) % 160)
+// Real count = Windows PCs with the EasyReach agent in that institution (Android agent not available yet)
+const deviceCountFor = (inst, platform = 'windows') => platform === 'android' ? 0 : (inst.devices || 0)
 
 function DeployWizard({ institutions, onClose, onCreated }) {
   const [step, setStep] = useState(1)
@@ -907,36 +907,49 @@ function DeployWizard({ institutions, onClose, onCreated }) {
   const [config, setConfig] = useState([{ k: 'server_url', v: 'https://api.easylearn.org.in' }, { k: 'school_code', v: '' }])
   const [submitting, setSubmitting] = useState(false)
   const [drag, setDrag] = useState(false)
+  const [uploadErr, setUploadErr] = useState('')
+  const [installArgs, setInstallArgs] = useState('/S')
   const inputRef = useRef(null)
 
   const pickFile = async (f) => {
     if (!f) return
-    if (!/\.(apk|exe|msi|appx)$/i.test(f.name)) return
+    if (!/\.(apk|exe|msi)$/i.test(f.name)) { setUploadErr('Only .exe, .msi or .apk files'); return }
+    if (f.size > 500 * 1024 * 1024) { setUploadErr('Package must be under 500 MB'); return }
+    setUploadErr('')
     setFile(f)
     setUploading(true)
     setProgress(0)
-    const r = await uploadPackage(f, setProgress)
-    setPkg(r)
-    setMeta({ name: r.detectedName, version: r.detectedVersion })
+    try {
+      const r = await uploadPackage(f, setProgress)
+      setPkg(r)
+      setMeta({ name: r.detectedName, version: r.detectedVersion })
+      setInstallArgs(/\.exe$/i.test(f.name) ? '/S' : '')
+    } catch (e) {
+      setFile(null); setUploadErr(e?.message || 'Upload failed')
+    }
     setUploading(false)
   }
 
   const allSelected = targets.length === institutions.length && institutions.length > 0
   const deviceCount = targets.reduce((s, id) => {
     const inst = institutions.find(i => i.id === id)
-    return s + (inst ? deviceCountFor(inst) : 0)
+    return s + (inst ? deviceCountFor(inst, pkg?.platform) : 0)
   }, 0)
 
   const submit = async () => {
     setSubmitting(true)
     const names = institutions.filter(i => targets.includes(i.id)).map(i => i.name)
-    const dep = await createDeployment({
-      name: meta.name, version: meta.version, fileName: pkg.fileName, platform: pkg.platform, pkg: pkg.detectedPkg, sizeMb: pkg.sizeMb,
-      deviceCount, targetLabel: allSelected ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0],
-      silent: opts.silent, autoLaunch: opts.autoLaunch,
-      config: Object.fromEntries(config.filter(c => c.k.trim()).map(c => [c.k.trim(), c.v])),
-    })
-    onCreated(dep)
+    try {
+      const dep = await createDeployment({
+        packageId: pkg.packageId, institution_ids: targets,
+        name: meta.name, version: meta.version, fileName: pkg.fileName, platform: pkg.platform, pkg: pkg.detectedPkg, sizeMb: pkg.sizeMb,
+        deviceCount, targetLabel: allSelected ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0],
+        silent: opts.silent, autoLaunch: opts.autoLaunch, allowAlways: opts.kiosk,
+        installArgs: /\.exe$/i.test(pkg.fileName) ? installArgs.trim() : null,
+        config: Object.fromEntries(config.filter(c => c.k.trim()).map(c => [c.k.trim(), c.v])),
+      })
+      onCreated(dep)
+    } catch (e) { setSubmitting(false); alert(e?.message || 'Could not start deployment') }
   }
 
   const steps = ['Upload package', 'Target devices', 'Configure & push']
@@ -973,8 +986,9 @@ function DeployWizard({ institutions, onClose, onCreated }) {
                 <i className="ti ti-cloud-upload text-[22px]" style={{ color: ACCENT_DEEP }} aria-hidden="true"></i>
               </span>
               <div className="text-[13.5px] font-semibold" style={{ color: C.textPrimary }}>Drop your package here or click to browse</div>
-              <div className="text-[11.5px] mt-1" style={{ color: C.textMuted }}>.apk for Android · .exe / .msi / .appx for Windows · up to 2 GB</div>
-              <input ref={inputRef} type="file" accept=".apk,.exe,.msi,.appx" className="hidden" onChange={e => pickFile(e.target.files?.[0])} />
+              <div className="text-[11.5px] mt-1" style={{ color: C.textMuted }}>.exe / .msi for Windows · .apk for Android · up to 500 MB</div>
+              <input ref={inputRef} type="file" accept=".apk,.exe,.msi" className="hidden" onChange={e => pickFile(e.target.files?.[0])} />
+              {uploadErr && <div className="text-[12px] font-semibold mt-3" style={{ color: C.danger }}>{uploadErr}</div>}
             </div>
           ) : (
             <div className="rounded-2xl p-4" style={{ border: `1px solid ${C.border}`, background: C.surfaceAlt }}>
@@ -1034,7 +1048,7 @@ function DeployWizard({ institutions, onClose, onCreated }) {
                     </span>
                     <span className="text-[13px] font-semibold truncate" style={{ color: C.textPrimary }}>{inst.name}</span>
                   </span>
-                  <span className="text-[11.5px] shrink-0" style={{ color: C.textMuted }}>{deviceCountFor(inst)} {pkg?.platform === 'android' ? 'Android' : 'Windows'} devices</span>
+                  <span className="text-[11.5px] shrink-0" style={{ color: C.textMuted }}>{deviceCountFor(inst, pkg?.platform)} {pkg?.platform === 'android' ? 'Android' : 'Windows'} devices</span>
                 </button>
               )
             })}
@@ -1053,16 +1067,22 @@ function DeployWizard({ institutions, onClose, onCreated }) {
       {step === 3 && (
         <>
           <div className="rounded-xl px-4 py-1 mb-4" style={{ border: `1px solid ${C.border}` }}>
-            <Toggle on={opts.silent} onChange={v => setOpts(o => ({ ...o, silent: v }))} label="Silent install" desc="Install in background without user prompt" />
+            <Toggle on={opts.silent} onChange={v => setOpts(o => ({ ...o, silent: v }))} label="Silent install" desc="Windows PCs always install silently (the agent runs in the background, no one sees a prompt)" />
             <div style={{ borderTop: `1px solid ${C.border}` }} />
-            <Toggle on={opts.grantPerms} onChange={v => setOpts(o => ({ ...o, grantPerms: v }))} label="Auto-grant runtime permissions" desc="Storage, camera & microphone granted at install" />
+            <Toggle on={opts.grantPerms} onChange={v => setOpts(o => ({ ...o, grantPerms: v }))} label="Auto-grant runtime permissions" desc="Android only — not used for Windows installs" />
             <div style={{ borderTop: `1px solid ${C.border}` }} />
-            <Toggle on={opts.autoLaunch} onChange={v => setOpts(o => ({ ...o, autoLaunch: v }))} label="Launch after install" desc="Open the app once installation completes" />
+            <Toggle on={opts.autoLaunch} onChange={v => setOpts(o => ({ ...o, autoLaunch: v }))} label="Launch after install" desc="Android only — Windows agent cannot open apps on the user's screen" />
             <div style={{ borderTop: `1px solid ${C.border}` }} />
-            <Toggle on={opts.kiosk} onChange={v => setOpts(o => ({ ...o, kiosk: v }))} label="Add to whitelist" desc="Allow this app even when whitelist mode is active" />
+            <Toggle on={opts.kiosk} onChange={v => setOpts(o => ({ ...o, kiosk: v }))} label="Add to whitelist" desc="Always-allow rule — never blocked by any blacklist rule" />
           </div>
 
-          <div className="text-[12.5px] font-semibold mb-2" style={{ color: C.textPrimary }}>Pre-configuration <span className="font-normal" style={{ color: C.textMuted }}>(managed app config)</span></div>
+          {pkg && /\.exe$/i.test(pkg.fileName) && (
+            <Field label="Silent install switch (EXE)" hint="Depends on the installer: /S (NSIS), /VERYSILENT (Inno Setup), /quiet or /silent. MSI files need nothing.">
+              <input value={installArgs} onChange={e => setInstallArgs(e.target.value)} className="am-input mono w-full text-[12.5px] px-3 py-2 rounded-xl" style={inputStyle} placeholder="/S" />
+            </Field>
+          )}
+
+          <div className="text-[12.5px] font-semibold mb-2" style={{ color: C.textPrimary }}>Pre-configuration <span className="font-normal" style={{ color: C.textMuted }}>(written to HKLM\SOFTWARE\ISF\EasyReach\AppConfig\&lt;app&gt; — the app must read it)</span></div>
           <div className="flex flex-col gap-2 mb-2">
             {config.map((row, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -1083,7 +1103,7 @@ function DeployWizard({ institutions, onClose, onCreated }) {
 
           <div className="rounded-xl px-4 py-3 text-[12px] flex items-start gap-2.5" style={{ background: C.accentBg, border: `1px solid ${C.accentBorder}`, color: C.textPrimary }}>
             <i className="ti ti-info-circle text-[15px] mt-0.5" style={{ color: ACCENT_DEEP }} aria-hidden="true"></i>
-            <span><b>{meta.name} v{meta.version}</b> will be pushed to <b>{fmt(deviceCount)} devices</b>. Offline devices will install automatically when they reconnect.</span>
+            <span><b>{meta.name} v{meta.version}</b> will be pushed to <b>{fmt(deviceCount)} devices</b>. Offline devices will install automatically when they reconnect.{pkg?.platform === 'android' ? ' Android agent is not available yet — no device will receive this APK.' : ''}</span>
           </div>
 
           <div className="flex justify-between gap-2 pt-5">
