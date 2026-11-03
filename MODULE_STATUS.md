@@ -3,7 +3,7 @@
 Har module ka asli status: frontend live backend se juda hai ya demo (browser localStorage) hai,
 backend bana hai ya nahi, aur test hua ya nahi. Har module complete hone par ye file update hoti hai.
 
-**Last updated:** 3 Nov 2026
+**Last updated:** 3 Nov 2026 (security incident added)
 
 **Legend**
 - ✅ **Complete** — frontend live backend se juda, backend tested, (MDM ke liye) asli PC par lagta hai
@@ -52,6 +52,17 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 
 ## 3. Deploy / pending actions (aapki taraf se)
 
+### 🚨 Security incident (3 Nov 2026) — sabse pehle
+Dono repos (`isf-api`, `isf-infra`) mein malware tha, `isf_user` naam se `isf-informatica` GitHub account ke email se commit hua (15 Oct + 21 Oct). Hata diya gaya: isf-api `e956a14`, isf-infra `20e4975`.
+- 4 GitHub workflows har push par repo + git history ke secrets `193.32.204.199` par bhejte the ("Security Audit" har push par chala)
+- `.vscode/tasks.json` VS Code mein folder kholte hi fake font (`fa-solid-400.woff2` = JavaScript) chalata tha: SSH keys, `~/.aws/credentials`, `.git-credentials`, `.npmrc`, AI tool tokens, env vars churata tha; Linux/macOS par `#ghc2` crontab backdoor
+
+- [ ] `isf-informatica` GitHub account: password badlo, 2FA on, saare Personal Access Tokens / deploy keys / OAuth apps review karke revoke
+- [ ] AWS: isf-api ki 5 files wala access key **turant rotate/delete** (ye exfiltrate hua maan ke chalo); naya key sirf DigitalOcean env mein
+- [ ] Jis bhi developer ne 15 Oct ke baad `isf-api` ya `isf-infra` VS Code mein khola: us machine ke SSH keys, GitHub/npm/AWS/Claude/Gemini tokens rotate; Linux/macOS par `crontab -l` mein `ghc2` line ho to hatao
+- [ ] GitHub org settings: Actions ke liye "Require approval for all outside collaborators" + workflow permissions read-only; org ke dusre repos mein bhi `.github/workflows`, `.vscode/tasks.json` check karo
+- [ ] Repo ke audit log (GitHub → Settings → Audit log) mein dekho `isf_user` ne aur kya kiya
+
 - [x] `easyreach/main.py` Module 1–7 + money precision + organizer today-date — deployed (2 Nov)
 - [ ] Latest `easyreach/main.py` (Module 8 App Management) DigitalOcean par deploy
 - [ ] Frontend `main` build karke infrapoint par upload
@@ -80,5 +91,6 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | 2 Nov 2026 | Module 4: Issue Manager live (frontend demo → backend, koi backend change nahi) |
 | 2 Nov 2026 | Module 5: Asset Manager live (frontend demo → backend, koi backend change nahi) |
 | 2 Nov 2026 | Module 7: Digital Organizer live; backend `/organizer/today?date=` (IST midnight fix) |
+| 3 Nov 2026 | 🚨 Malware removed from isf-infra (workflows + VS Code auto-run task + fake font), same as isf-api |
 | 3 Nov 2026 | Module 8: App Management live — backend + PC agent + frontend (pehla module jiska backend scratch se bana) |
 | 2 Nov 2026 | Module 6: Account Manager live; backend money precision bug fix (FLOAT ≈7 digit → DOUBLE, ₹12,34,567.89 pehle ₹12,34,570 save hota tha) |
