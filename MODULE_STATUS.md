@@ -46,7 +46,7 @@ Frontend = `isf-infra/frontend` (infrapoint.co.in).
 | Real-Time Reports | `/mdm/reports` | 🟠 Partial | — | — | Sirf school counts (total/active/pending/killed) |
 | Data Security & Hardware Restriction | `/schools/1/kill` | 🟠 Partial | ✅ Kill switch | — | School id 1 hardcoded; Level 1 schtasks bug (agent context) pending |
 | Geofencing & Location | `/mdm/geofencing` | 🟠 Partial | ❌ | — | Sirf IP-based approx location + manual correction |
-| App Management | `/mdm/app-management` | ✅ Complete (Module 8) | ✅ Windows: inventory, block (5 sec), silent uninstall, EXE/MSI push, usage | ✅ agent 33/33, E2E 54/54 (local + S3), frontend 25/25 | Whitelist (kiosk) mode Windows par enforce nahi; uninstall sirf MSI / QuietUninstallString wale apps; per-user (HKCU) installs inventory mein nahi; installers S3 par (`S3_BUCKET`), max 500 MB; APK = Android agent nahi |
+| App Management | `/mdm/app-management` | ✅ Complete (Module 8) | ✅ Windows: inventory, block (5 sec), silent uninstall, EXE/MSI push, usage | ✅ agent 33/33, E2E 54/54 (local + S3), frontend 25/25 | Whitelist (kiosk) mode Windows par enforce nahi; uninstall sirf MSI / QuietUninstallString wale apps; per-user (HKCU) installs inventory mein nahi; installers ISF office server par (fallback S3), max 500 MB; APK = Android agent nahi |
 | Content Publishing | `/mdm/content-publishing` | 🔴 Demo only | ❌ | — | Backend + file storage + agent banana hai |
 | Groups & Roles | `/mdm/groups-roles` | 🔴 Mock UI | ❌ | — | List-users endpoint chahiye |
 
@@ -59,6 +59,8 @@ Dono repos (`isf-api`, `isf-infra`) mein malware tha, `isf_user` naam se `isf-in
 
 - [ ] `isf-informatica` GitHub account: password badlo, 2FA on, saare Personal Access Tokens / deploy keys / OAuth apps review karke revoke
 - [ ] AWS: isf-api ki 5 files wala access key **turant rotate/delete** (ye exfiltrate hua maan ke chalo); naya key sirf DigitalOcean env mein
+- [ ] Office server upload key (`FM_ONPREM_API_KEY`, `main.py` mein hardcoded) **rotate karo** — 3 Nov 07:39 UTC push par malware workflows chale the; naya key receiver par aur DigitalOcean env (`ONPREM_API_KEY`) mein, code ka default hatao
+- [ ] `EASYREACH_SECRET_KEY` + `LICENSE_CRON_SECRET` DigitalOcean env mein **naye random values** set karo (code ke defaults leak ho chuke; env set na ho to koi bhi admin login token bana sakta hai)
 - [ ] Jis bhi developer ne 15 Oct ke baad `isf-api` ya `isf-infra` VS Code mein khola: us machine ke SSH keys, GitHub/npm/AWS/Claude/Gemini tokens rotate; Linux/macOS par `crontab -l` mein `ghc2` line ho to hatao
 - [ ] GitHub org settings: Actions ke liye "Require approval for all outside collaborators" + workflow permissions read-only; org ke dusre repos mein bhi `.github/workflows`, `.vscode/tasks.json` check karo
 - [ ] Repo ke audit log (GitHub → Settings → Audit log) mein dekho `isf_user` ne aur kya kiya
@@ -70,8 +72,10 @@ Dono repos (`isf-api`, `isf-infra`) mein malware tha, `isf_user` naam se `isf-in
 - [ ] DigitalOcean env check: `EASYREACH_SECRET_KEY`, `LICENSE_CRON_SECRET` set hain
 - [ ] `yash@isf.com` password change (chat mein share hua tha)
 - [ ] 🔴 AWS access key + secret 5 backend files mein hardcoded hai (`ocr_paperchecking`, `aws_upload`, `flipbook`, `isfathena`, `Ebook_genrator`) — key rotate karo, code se hatao, sirf env var use karo
-- [ ] 🔴 DigitalOcean App Platform ki disk har deploy par mit jaati hai: Visitors photos, Issue screenshots, Service Desk attachments abhi wahi disk par hain → har redeploy par gayab. Inhe bhi S3 par shift karna hai (App Management installers already S3 par)
-- [ ] DigitalOcean env check: `S3_BUCKET` + `AWS_ACCESS_KEY_ID` set hain (App Management installers isi bucket mein `easyreach/app-packages/` ke andar jaate hain; set na ho to local disk = redeploy par delete)
+- [x] Uploads ab ISF office server (nginx + upload-receiver) par: Service Desk attachments, visitor photos / ID proofs, issue screenshots, app installers → `C:\MediaStorage\ISF-Infra_Doc\{ServiceDesk,Visitors,Issues,AppPackages}\…` (3 Nov). Purani files jo DigitalOcean disk par thi wo deploy ke saath ja chuki hain
+- [ ] Office server nginx: `autoindex off` confirm karo, aur `/ISF-Infra_Doc/` ko sirf backend / agents ke liye restrict karna (abhi URL pata ho to koi bhi file khol sakta hai; file names random 32-hex hain)
+- [ ] Office server nginx `client_max_body_size` installers ke liye kam se kam 500M (warna bade EXE/MSI upload par 413)
+- [ ] DigitalOcean env (optional): `ONPREM_UPLOAD_URL`, `ONPREM_BASE_URL`, `ONPREM_API_KEY` — set na ho to FortiMates wale `FM_ONPREM_*` use hote hain
 
 ## 4. Open decisions
 
@@ -91,6 +95,7 @@ Dono repos (`isf-api`, `isf-infra`) mein malware tha, `isf_user` naam se `isf-in
 | 2 Nov 2026 | Module 4: Issue Manager live (frontend demo → backend, koi backend change nahi) |
 | 2 Nov 2026 | Module 5: Asset Manager live (frontend demo → backend, koi backend change nahi) |
 | 2 Nov 2026 | Module 7: Digital Organizer live; backend `/organizer/today?date=` (IST midnight fix) |
+| 3 Nov 2026 | File storage → ISF office server (Service Desk, Visitors, Issues, App installers); S3 sirf fallback |
 | 3 Nov 2026 | 🚨 Malware removed from isf-infra (workflows + VS Code auto-run task + fake font), same as isf-api |
 | 3 Nov 2026 | Module 8: App Management live — backend + PC agent + frontend (pehla module jiska backend scratch se bana) |
 | 2 Nov 2026 | Module 6: Account Manager live; backend money precision bug fix (FLOAT ≈7 digit → DOUBLE, ₹12,34,567.89 pehle ₹12,34,570 save hota tha) |
