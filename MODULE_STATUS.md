@@ -66,8 +66,8 @@ Dono repos (`isf-api`, `isf-infra`) mein malware tha, `isf_user` naam se `isf-in
 - [ ] Repo ke audit log (GitHub → Settings → Audit log) mein dekho `isf_user` ne aur kya kiya
 
 - [x] `easyreach/main.py` Module 1–7 + money precision + organizer today-date — deployed (2 Nov)
-- [ ] Latest `easyreach/main.py` (Module 8 App Management) DigitalOcean par deploy
-- [ ] Frontend `main` build karke infrapoint par upload
+- [x] `easyreach/main.py` Module 8 + office-server storage pushed to main (64d21eb, 3 Nov) — DigitalOcean auto-deploy
+- [x] Frontend build (cb9cd6b, bundle `index-DLq1VF15.js`) infrapoint.co.in par live — 3 Nov 17:28
 - [ ] MBSE PCs (IOE-TNPLAB, DESKTOP-QK34H3A) par naya agent ZIP install (Module 8 ke baad wala) — bina iske Policy/Browser/App commands fail dikhayenge
 - [ ] DigitalOcean env check: `EASYREACH_SECRET_KEY`, `LICENSE_CRON_SECRET` set hain
 - [ ] `yash@isf.com` password change (chat mein share hua tha)
