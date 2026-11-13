@@ -75,15 +75,23 @@ export default function ConfigurationsPage() {
   useEffect(() => {
     apiGet('/settings')
       .then((s) => {
-        setProfile({ display_name: s.display_name, alert_email: s.alert_email, role: s.role })
-        setNotifications(s.notifications)
+        // Guard: if the backend returns no object (e.g. older deploy / HTML fallback),
+        // keep defaults instead of crashing the whole page (blank screen).
+        if (!s || typeof s !== 'object') {
+          setLoadError('Settings could not be loaded from the server.')
+          return
+        }
+        setProfile({ display_name: s.display_name || '', alert_email: s.alert_email || '', role: s.role || '' })
+        if (s.notifications && typeof s.notifications === 'object') {
+          setNotifications((n) => ({ ...n, ...s.notifications }))
+        }
       })
       .catch((err) => setLoadError(err.message))
   }, [])
 
   const [profileSaved, saveProfile, profileError] = useSavedFlash(async () => {
     const s = await apiPut('/settings', { display_name: profile.display_name, alert_email: profile.alert_email })
-    setProfile((p) => ({ ...p, display_name: s.display_name, alert_email: s.alert_email }))
+    setProfile((p) => ({ ...p, display_name: s?.display_name ?? p.display_name, alert_email: s?.alert_email ?? p.alert_email }))
   })
   const [securitySaved, saveSecurity, securityError] = useSavedFlash(async () => {
     if (passwords.next !== passwords.confirm) throw new Error('New password and confirm do not match')
@@ -93,7 +101,9 @@ export default function ConfigurationsPage() {
   })
   const [notifSaved, saveNotif, notifError] = useSavedFlash(async () => {
     const s = await apiPut('/settings', { notifications })
-    setNotifications(s.notifications)
+    if (s?.notifications && typeof s.notifications === 'object') {
+      setNotifications((n) => ({ ...n, ...s.notifications }))
+    }
   })
 
   function toggleNotif(key) {
