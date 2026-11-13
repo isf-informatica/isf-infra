@@ -240,6 +240,7 @@ function PublishWizard({ items, institutions, onClose, onPublished }) {
       contentIds: items.map(c => c.id), deviceCount: count,
       targetLabel: allSelected ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0],
       offline: opts.offline, mandatory: opts.mandatory, expiresAt: opts.expires ? opts.expiresAt : null, schedule: opts.schedule,
+      institution_ids: targets,
     })
     onPublished(pub)
   }
@@ -495,7 +496,7 @@ function BrandPushModal({ institutions, onClose, onPushed }) {
   const submit = async () => {
     setBusy(true)
     const names = institutions.filter(i => targets.includes(i.id)).map(i => i.name)
-    onPushed(await pushBranding({ deviceCount: count, targetLabel: targets.length === institutions.length ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0] }))
+    onPushed(await pushBranding({ deviceCount: count, targetLabel: targets.length === institutions.length ? 'All institutions' : names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0], institution_ids: targets }))
   }
   return (
     <Modal title="Push branding to devices" onClose={onClose} width={560}>
