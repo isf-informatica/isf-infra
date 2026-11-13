@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ISF Infra — Protected Content Viewer (InfraDRM)</title>
+<style>
+  :root { --bg:#0e0e11; --panel:#17171b; --ink:#f3f3ef; --muted:#9a9a93; --accent:#4F46E5; --ok:#17b26a; --err:#e4483c; --line:#2a2a2f; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; background:var(--bg); color:var(--ink); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  #app { height:100%; display:flex; flex-direction:column; }
+  header { display:flex; align-items:center; gap:12px; padding:10px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header .logo { font-weight:800; letter-spacing:.3px; }
+  header .title { color:var(--muted); font-size:13px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  header .lock { color:var(--ok); font-size:12px; }
+  #viewer { position:relative; flex:1; overflow:hidden; background:#1b1b1f; }
+  #viewer iframe, #viewer img { width:100%; height:100%; border:0; background:#222; object-fit:contain; display:block; }
+  /* forensic watermark overlay */
+  #wm { position:absolute; inset:0; pointer-events:none; z-index:10; overflow:hidden; opacity:.14; }
+  #wm div { position:absolute; transform:rotate(-30deg); white-space:nowrap; font-size:15px; color:#fff; font-weight:600; }
+  .overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(10,10,12,.96); z-index:50; padding:16px; }
+  .card { width:min(94vw,440px); background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:26px; }
+  .card h1 { font-size:19px; margin-bottom:4px; }
+  .card p  { color:var(--muted); font-size:13px; margin-bottom:16px; line-height:1.5; }
+  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 5px; }
+  input { width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--line); background:#101013; color:var(--ink); font-size:14px; }
+  button { margin-top:18px; width:100%; padding:12px; border:0; border-radius:9px; background:var(--accent); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  .msg { text-align:center; color:var(--muted); font-size:14px; line-height:1.6; }
+  .err { color:var(--err); font-size:12px; margin-top:10px; min-height:16px; }
+  .spin { display:inline-block; width:18px; height:18px; border:2px solid #444; border-top-color:var(--accent); border-radius:50%; animation:sp .8s linear infinite; vertical-align:middle; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  .foot { font-size:11px; color:#55555c; margin-top:14px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span class="logo">ISF&nbsp;Infra</span>
+    <span class="title" id="docTitle">Protected Content Viewer</span>
+    <span class="lock" id="lock"></span>
+  </header>
+  <div id="viewer">
+    <div id="wm"></div>
+  </div>
+</div>
+
+<!-- Access card -->
+<div class="overlay" id="gate">
+  <div class="card">
+    <h1>Open protected content</h1>
+    <p>Enter your license key to view DRM-protected content. The content key is used only in memory on this device — it is never stored.</p>
+    <label>API base URL</label>
+    <input id="apiBase" placeholder="https://dolphin-app-33jp4.ondigitalocean.app/easyreach" />
+    <label>License key</label>
+    <input id="licKey" placeholder="DRM-XXXX-XXXX-XXXX" autocomplete="off" />
+    <label>Your name</label>
+    <input id="userName" placeholder="e.g. Aarav Patil" />
+    <label>Your ID (roll no. / student id)</label>
+    <input id="userId" placeholder="e.g. STU-20261040" />
+    <button id="openBtn">Unlock &amp; view</button>
+    <div class="err" id="gateErr"></div>
+    <div class="foot">Forensic watermark: your name &amp; ID are woven across the page so any leaked copy can be traced back to you. Video and screen-capture-proof playback require the native player.</div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const DEFAULT_API = "https://dolphin-app-33jp4.ondigitalocean.app/easyreach";
+const $ = (id) => document.getElementById(id);
+
+// stable per-browser device fingerprint (same browser = same DRM seat)
+function fingerprint(){
+  let fp = localStorage.getItem("isf_drm_fp");
+  if(!fp){ fp = (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random())).replace(/-/g,"").slice(0,16); localStorage.setItem("isf_drm_fp", fp); }
+  return fp;
+}
+function b64ToBytes(b64){ const s = atob(b64); const a = new Uint8Array(s.length); for(let i=0;i<s.length;i++) a[i]=s.charCodeAt(i); return a; }
+
+function drawWatermark(text){
+  const wm = $("wm"); wm.innerHTML = "";
+  const W = wm.clientWidth, H = wm.clientHeight;
+  for(let y=-40; y<H+80; y+=120){
+    for(let x=-60; x<W+160; x+=320){
+      const d = document.createElement("div");
+      d.style.left = x+"px"; d.style.top = y+"px"; d.textContent = text;
+      wm.appendChild(d);
+    }
+  }
+}
+
+async function unlock(apiBase, licKey, userName, userId){
+  const base = (apiBase || DEFAULT_API).replace(/\/$/,"");
+  const fp = fingerprint();
+  // 1) checkout a content key (server enforces seats/expiry/revocation)
+  const co = await fetch(base + "/drm/license/checkout", {
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ licenseKey: licKey, deviceFingerprint: fp, userId, userName, deviceName: navigator.platform || "Web", os: navigator.userAgent.slice(0,40) })
+  }).then(r=>r.json());
+  if(!co.ok) throw new Error(co.reason || "Access denied");
+
+  // 2) download the encrypted blob
+  const blobUrl = base.replace(/\/easyreach$/,"") + co.blobUrl;  // co.blobUrl already includes /easyreach
+  const ct = await fetch(blobUrl).then(r=>{ if(!r.ok) throw new Error("Content fetch failed"); return r.arrayBuffer(); });
+
+  // 3) decrypt in-browser (AES-256-GCM) — interoperable with Python cryptography AESGCM
+  const key = await crypto.subtle.importKey("raw", b64ToBytes(co.contentKey), "AES-GCM", false, ["decrypt"]);
+  const iv = b64ToBytes(co.nonce);
+  const plain = await crypto.subtle.decrypt({ name:"AES-GCM", iv }, key, ct);
+
+  // 4) render by type
+  const type = co.type || "pdf";
+  const viewer = $("viewer");
+  // clear previous content (keep the watermark layer)
+  [...viewer.querySelectorAll("iframe,img,.msg")].forEach(n=>n.remove());
+  $("docTitle").textContent = co.title || "Protected content";
+  $("lock").textContent = "🔒 " + (co.encryption || "AES-256-GCM");
+
+  if(type === "image"){
+    const blob = new Blob([plain]); const u = URL.createObjectURL(blob);
+    const img = document.createElement("img"); img.src = u; viewer.appendChild(img);
+  } else if(type === "pdf"){
+    const blob = new Blob([plain], { type:"application/pdf" }); const u = URL.createObjectURL(blob) + "#toolbar=0";
+    const f = document.createElement("iframe"); f.src = u; viewer.appendChild(f);
+  } else {
+    const d = document.createElement("div"); d.className = "msg";
+    d.style.cssText = "position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center";
+    d.innerHTML = "This content type (<b>"+type+"</b>) opens in the ISF Infra native reader.<br/>The file was decrypted successfully but in-browser preview is available for PDF and images only.";
+    viewer.appendChild(d);
+  }
+
+  // 5) forensic watermark overlay (payload from server + user identity)
+  const label = (userName||"") + " · " + (userId||"") + " · " + (co.watermark && co.watermark.payload ? co.watermark.payload : fp);
+  drawWatermark(label);
+  window.addEventListener("resize", ()=>drawWatermark(label));
+  $("gate").style.display = "none";
+}
+
+$("openBtn").onclick = async () => {
+  $("gateErr").textContent = "";
+  const apiBase = $("apiBase").value.trim() || DEFAULT_API;
+  const licKey = $("licKey").value.trim();
+  const userName = $("userName").value.trim();
+  const userId = $("userId").value.trim();
+  if(!licKey){ $("gateErr").textContent = "Enter your license key."; return; }
+  $("openBtn").innerHTML = '<span class="spin"></span>';
+  try { await unlock(apiBase, licKey, userName, userId); }
+  catch(e){ $("gateErr").textContent = String(e.message || e); }
+  finally { $("openBtn").innerHTML = "Unlock &amp; view"; }
+};
+$("apiBase").value = DEFAULT_API;
+// light deterrents (not a substitute for native hard-DRM)
+document.addEventListener("contextmenu", e=>e.preventDefault());
+</script>
+</body>
+</html>
