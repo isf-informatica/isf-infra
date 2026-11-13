@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getAllSchools } from '../../api/schools'
+import { getGeofence, setGeofence } from '../../api/mdmOps'
 import Topbar from '../../components/common/Topbar'
 
 /* Same tokens as Login.jsx / MdmHub.jsx — kept identical so every page in the app matches. */
@@ -53,20 +54,26 @@ const saveLocationOverride = (schoolId, loc) => {
 export default function GeofencingView() {
   const [schools, setSchools] = useState([])
   const [locations, setLocations] = useState({})
+  const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState({ city: '', region: '' })
 
   useEffect(() => {
     getAllSchools()
-      .then(data => {
+      .then(async (data) => {
         setSchools(data)
+        // persisted geofence configs from the backend take priority
+        let configured = {}
+        try {
+          const gf = await getGeofence()
+          setEvents(gf.events || [])
+          ;(gf.data || []).forEach(g => { configured[g.schoolId] = true; setLocations(prev => ({ ...prev, [g.schoolId]: { city: g.city, region: g.region, source: 'manual' } })) })
+        } catch (e) { console.error(e) }
         const overrides = getLocationOverrides()
         data.forEach(async (school) => {
-          if (overrides[school.id]) {
-            setLocations(prev => ({ ...prev, [school.id]: overrides[school.id] }))
-            return
-          }
+          if (configured[school.id]) return
+          if (overrides[school.id]) { setLocations(prev => ({ ...prev, [school.id]: overrides[school.id] })); return }
           if (school.public_ip) {
             const loc = await fetchIpLocation(school.public_ip)
             if (loc) setLocations(prev => ({ ...prev, [school.id]: loc }))
@@ -83,12 +90,14 @@ export default function GeofencingView() {
     setEditingId(school.id)
   }
 
-  const saveEdit = (schoolId) => {
+  const saveEdit = async (schoolId) => {
     if (!form.city.trim()) return
     const loc = { city: form.city.trim(), region: form.region.trim(), source: 'manual' }
-    saveLocationOverride(schoolId, loc)
     setLocations(prev => ({ ...prev, [schoolId]: loc }))
     setEditingId(null)
+    saveLocationOverride(schoolId, loc)   // local cache for Dashboard parity
+    try { await setGeofence({ schoolId, city: loc.city, region: loc.region, radiusM: 500, enabled: true }) }
+    catch (e) { console.error('geofence save failed', e) }
   }
 
   return (
@@ -167,6 +176,32 @@ export default function GeofencingView() {
               })}
             </div>
           )}
+
+          {/* Geofence breach events (reported by device agents) */}
+          <div className="mt-8">
+            <h2 className="text-[15px] font-bold mb-1" style={{ color: C.textPrimary }}>Breach alerts</h2>
+            <p className="text-[12px] mb-3" style={{ color: C.textSecondary }}>Agents report when a device leaves its geofence. GPS-level tracking needs the Android/Windows agent build.</p>
+            {!events.length ? (
+              <div className="rounded-2xl px-5 py-6 text-[12.5px]" style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textMuted }}>
+                No breach alerts yet.
+              </div>
+            ) : (
+              <div className="rounded-2xl overflow-hidden" style={{ background: C.surface, border: `1px solid ${C.border}` }}>
+                {events.map(e => (
+                  <div key={e.id} className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <i className="ti ti-map-pin-off text-[15px]" style={{ color: '#8A2A2A' }} aria-hidden="true"></i>
+                      <div className="min-w-0">
+                        <div className="text-[12.5px] font-semibold truncate" style={{ color: C.textPrimary }}>{e.device || 'Device'} · {e.school}</div>
+                        <div className="text-[11.5px]" style={{ color: C.textMuted }}>{e.detail || e.kind}{e.lat != null ? ` · ${e.lat}, ${e.lng}` : ''}</div>
+                      </div>
+                    </div>
+                    <span className="text-[11px] shrink-0" style={{ color: C.textMuted }}>{e.at ? new Date(e.at).toLocaleString('en-IN') : ''}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDevices } from '../../api/devices'
 import { sendCommand, pollCommandResult } from '../../api/commands'
+import { wipeDevice } from '../../api/mdmOps'
 import Topbar from '../../components/common/Topbar'
 import SchoolCards from '../../components/mdm/SchoolCards'
 
@@ -363,11 +364,22 @@ export default function RemoteManagementView() {
                             {selectedDevice.ip_address || 'no IP'} · {selectedDevice.device_type} · {selectedDevice.os || 'unknown OS'}
                           </div>
                         </div>
-                        <span className="ml-auto text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"
-                          style={{ color: selectedDevice.agent_online ? V.green : V.textMuted, background: 'rgba(255,255,255,0.05)' }}>
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: selectedDevice.agent_online ? V.green : V.textMuted }} />
-                          {selectedDevice.agent_online ? 'Agent Online' : 'Agent Offline'}
-                        </span>
+                        <div className="ml-auto flex items-center gap-2">
+                          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"
+                            style={{ color: selectedDevice.agent_online ? V.green : V.textMuted, background: 'rgba(255,255,255,0.05)' }}>
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: selectedDevice.agent_online ? V.green : V.textMuted }} />
+                            {selectedDevice.agent_online ? 'Agent Online' : 'Agent Offline'}
+                          </span>
+                          <button onClick={async () => {
+                              if (!window.confirm(`Remote-wipe "${selectedDevice.name}"? This queues an irreversible wipe command for this device.`)) return
+                              try { const r = await wipeDevice(selectedDevice.id); alert(`Remote wipe queued for ${r.device}.`) }
+                              catch (e) { alert(e?.response?.data?.detail || 'Wipe failed (admin only).') }
+                            }}
+                            className="text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"
+                            style={{ color: V.orange, background: 'rgba(244,135,113,0.12)', border: '1px solid rgba(244,135,113,0.3)' }}>
+                            <i className="ti ti-eraser text-[13px]" aria-hidden="true"></i> Remote Wipe
+                          </button>
+                        </div>
                       </div>
 
                       {/* Quick action buttons — click = run + show formatted result here */}
