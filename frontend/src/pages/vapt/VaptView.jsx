@@ -243,7 +243,11 @@ function NewScanModal({ onClose, onStarted }) {
   const [busy, setBusy] = useState(false)
   const finalTarget = custom.trim() || target
 
-  const submit = async () => { setBusy(true); onStarted(await startScan({ target: finalTarget, type, project })) }
+  const submit = async () => {
+    setBusy(true)
+    try { onStarted(await startScan({ target: finalTarget, type, project, authorized: ack })) }
+    catch (e) { setBusy(false); alert(e?.response?.data?.detail || 'Could not start scan') }
+  }
 
   return (
     <Modal title="New scan" onClose={onClose} width={580}>
