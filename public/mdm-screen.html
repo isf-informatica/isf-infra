@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ISF Infra — Remote Screen (MDM)</title>
+<style>
+  :root { --bg:#0e0e11; --panel:#17171b; --ink:#f3f3ef; --muted:#9a9a93; --accent:#2f5fd0; --ok:#17b26a; --err:#e4483c; --line:#2a2a2f; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; background:var(--bg); color:var(--ink); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  #app { height:100%; display:flex; flex-direction:column; }
+  header { display:flex; align-items:center; gap:10px; padding:9px 14px; background:var(--panel); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  header .logo { font-weight:800; }
+  input, select { padding:7px 10px; border-radius:8px; border:1px solid var(--line); background:#101013; color:var(--ink); font-size:13px; }
+  input.id { width:80px; } input.tok { width:150px; }
+  button { padding:7px 14px; border:0; border-radius:8px; background:var(--accent); color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
+  button.stop { background:#3a2326; color:#f0b4ad; }
+  button:disabled { opacity:.5; cursor:default; }
+  .stat { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; margin-left:auto; }
+  .dot { width:8px; height:8px; border-radius:50%; background:#555; } .dot.on { background:var(--ok); } .dot.off { background:var(--err); }
+  .ctl { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+  #screenWrap { flex:1; display:flex; align-items:center; justify-content:center; background:#000; overflow:hidden; position:relative; }
+  #screen { max-width:100%; max-height:100%; object-fit:contain; cursor:crosshair; background:#111; }
+  #msg { position:absolute; color:var(--muted); font-size:14px; text-align:center; padding:16px; }
+  .foot { font-size:11px; color:#55555c; padding:6px 14px; border-top:1px solid var(--line); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span class="logo">ISF&nbsp;Infra</span>
+    <span style="color:var(--muted);font-size:12px">Remote Screen</span>
+    <input class="id" id="devId" placeholder="device id" />
+    <input class="tok" id="tok" placeholder="admin token (auto)" />
+    <select id="fps"><option value="1">1 fps</option><option value="2" selected>2 fps</option><option value="3">3 fps</option><option value="5">5 fps</option></select>
+    <button id="startBtn">Start</button>
+    <button id="stopBtn" class="stop" disabled>Stop</button>
+    <label class="ctl"><input type="checkbox" id="control" /> Control (mouse/keyboard)</label>
+    <span class="stat"><span class="dot" id="dot"></span><span id="stat">idle</span></span>
+  </header>
+  <div id="screenWrap" tabindex="0">
+    <div id="msg">Enter a device id and press Start. The device agent must be running in the user's session for live screen.</div>
+    <img id="screen" style="display:none" alt="remote screen" />
+  </div>
+  <div class="foot" id="foot">Frame-streaming remote access. Note: the Windows agent must run in the interactive user session (not as SYSTEM) to capture the desktop.</div>
+</div>
+
+<script>
+"use strict";
+const DEFAULT_API = "https://dolphin-app-33jp4.ondigitalocean.app/easyreach";
+const $ = (id) => document.getElementById(id);
+let API = DEFAULT_API;
+let running = false, devId = null, pollTimer = null, frameUrl = null;
+
+function token(){ return ($("tok").value.trim()) || (localStorage.getItem("token") || ""); }
+function auth(){ return { "Authorization": "Bearer " + token() }; }
+async function api(path, opts){
+  const r = await fetch(API + path, Object.assign({ headers: auth() }, opts));
+  return r;
+}
+function setStat(txt, on){ $("stat").textContent = txt; $("dot").className = "dot" + (on===true?" on":on===false?" off":""); }
+
+async function start(){
+  devId = $("devId").value.trim();
+  if(!devId){ setStat("enter device id", false); return; }
+  if(!token()){ setStat("no admin token — paste it", false); return; }
+  const fps = $("fps").value;
+  const r = await api(`/mdm/screen/${devId}/start`, { method:"POST", headers:{...auth(), "Content-Type":"application/json"}, body: JSON.stringify({ fps: +fps }) });
+  if(!r.ok){ setStat("start failed ("+r.status+")", false); return; }
+  running = true; $("startBtn").disabled = true; $("stopBtn").disabled = false;
+  $("msg").textContent = "Waiting for the first frame… (agent must be in the user session)";
+  loop();
+}
+async function stop(){
+  running = false; $("startBtn").disabled = false; $("stopBtn").disabled = true;
+  clearTimeout(pollTimer);
+  if(devId) try { await api(`/mdm/screen/${devId}/stop`, { method:"POST" }); } catch {}
+  setStat("stopped", false); $("screen").style.display="none"; $("msg").style.display="block";
+  $("msg").textContent = "Stopped.";
+}
+async function loop(){
+  if(!running) return;
+  try {
+    const r = await api(`/mdm/screen/${devId}/frame`);
+    if(r.ok){
+      const blob = await r.blob();
+      if(frameUrl) URL.revokeObjectURL(frameUrl);
+      frameUrl = URL.createObjectURL(blob);
+      const img = $("screen"); img.src = frameUrl; img.style.display="block"; $("msg").style.display="none";
+      setStat("streaming", true);
+    } else {
+      setStat(r.status===404 ? "waiting for frame…" : ("frame "+r.status), r.status===404?undefined:false);
+    }
+  } catch(e){ setStat("offline", false); }
+  const fps = +$("fps").value || 2;
+  pollTimer = setTimeout(loop, Math.max(200, 1000/fps));
+}
+
+// input → normalized coords
+function normXY(ev){
+  const img = $("screen"); const rect = img.getBoundingClientRect();
+  // account for object-fit: contain letterboxing
+  const natAR = img.naturalWidth/img.naturalHeight, boxAR = rect.width/rect.height;
+  let dw = rect.width, dh = rect.height, ox = 0, oy = 0;
+  if(natAR > boxAR){ dh = rect.width/natAR; oy = (rect.height-dh)/2; } else { dw = rect.height*natAR; ox = (rect.width-dw)/2; }
+  const x = (ev.clientX - rect.left - ox)/dw, y = (ev.clientY - rect.top - oy)/dh;
+  return { x: Math.min(1,Math.max(0,x)), y: Math.min(1,Math.max(0,y)) };
+}
+async function sendInput(events){ if(!running||!devId) return; try { await api(`/mdm/screen/${devId}/input`, { method:"POST", headers:{...auth(),"Content-Type":"application/json"}, body: JSON.stringify({ events }) }); } catch {} }
+
+$("screen").addEventListener("click", (ev)=>{ if(!$("control").checked) return; const p = normXY(ev); sendInput([{ t:"click", x:p.x, y:p.y }]); });
+$("screen").addEventListener("contextmenu", (ev)=>{ if(!$("control").checked) return; ev.preventDefault(); const p = normXY(ev); sendInput([{ t:"rclick", x:p.x, y:p.y }]); });
+$("screenWrap").addEventListener("keydown", (ev)=>{ if(!$("control").checked) return; ev.preventDefault(); sendInput([{ t:"key", vk: ev.keyCode }]); });
+
+$("startBtn").onclick = start;
+$("stopBtn").onclick = stop;
+window.addEventListener("beforeunload", ()=>{ if(running && devId){ navigator.sendBeacon && null; } });
+// prefill token hint
+if(localStorage.getItem("token")) $("tok").placeholder = "admin token (using app login)";
+</script>
+</body>
+</html>
