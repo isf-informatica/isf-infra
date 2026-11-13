@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>ISF Infra — Signage Player</title>
+<style>
+  :root { --bg:#0b0b0d; --ink:#f3f3ef; --muted:#9a9a93; --accent:#2f5fd0; --ok:#17b26a; --err:#e4483c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { width:100%; height:100%; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; overflow:hidden; }
+  #stage { position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; }
+  #stage img, #stage video, #stage iframe { max-width:100%; max-height:100%; width:100%; height:100%; object-fit:contain; border:0; background:#000; }
+  #stage iframe { object-fit:fill; }
+  /* overlays */
+  .overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(8,8,10,.92); z-index:50; }
+  .card { width:min(92vw,460px); background:#17171a; border:1px solid #2a2a2f; border-radius:16px; padding:28px; }
+  .card h1 { font-size:20px; margin-bottom:4px; }
+  .card p  { color:var(--muted); font-size:13px; margin-bottom:18px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 5px; }
+  input { width:100%; padding:11px 12px; border-radius:9px; border:1px solid #2f2f35; background:#101013; color:var(--ink); font-size:14px; }
+  button { margin-top:18px; width:100%; padding:12px; border:0; border-radius:9px; background:var(--accent); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  .pill { position:fixed; top:10px; right:12px; z-index:40; font-size:11px; color:var(--muted);
+    background:rgba(0,0,0,.45); padding:5px 10px; border-radius:20px; display:flex; gap:7px; align-items:center;
+    opacity:0; transition:opacity .3s; }
+  .pill.show { opacity:1; }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--ok); }
+  .dot.off { background:var(--err); }
+  .msg { color:var(--muted); font-size:14px; text-align:center; line-height:1.5; }
+  .err { color:var(--err); font-size:12px; margin-top:8px; min-height:16px; }
+  .idle { text-align:center; }
+  .idle .logo { font-size:26px; font-weight:800; letter-spacing:.5px; }
+  .idle .sub { color:var(--muted); margin-top:8px; font-size:13px; }
+  .hint { position:fixed; bottom:10px; left:0; right:0; text-align:center; color:#45454c; font-size:11px; z-index:40; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="pill" id="pill"><span class="dot" id="dot"></span><span id="pillTxt">connecting…</span></div>
+<div class="hint" id="hint">Press <b>S</b> to open settings · <b>F</b> for fullscreen</div>
+
+<!-- Setup overlay -->
+<div class="overlay" id="setup" style="display:none">
+  <div class="card">
+    <h1>Set up this screen</h1>
+    <p>Enter the API address and the enrollment token shown when this screen was added in ISF Infra → Digital Signboard.</p>
+    <label>API base URL</label>
+    <input id="apiBase" placeholder="https://dolphin-app-33jp4.ondigitalocean.app/easyreach" />
+    <label>Enrollment token</label>
+    <input id="token" placeholder="paste the screen's token" autocomplete="off" />
+    <button id="pairBtn">Pair &amp; start</button>
+    <div class="err" id="setupErr"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const DEFAULT_API = "https://dolphin-app-33jp4.ondigitalocean.app/easyreach";
+const LS = "isf_signage_player_v1";
+const $ = (id) => document.getElementById(id);
+const stage = $("stage");
+
+// ---- persisted config ----
+function loadCfg(){ try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch { return {}; } }
+function saveCfg(c){ try { localStorage.setItem(LS, JSON.stringify(c)); } catch {} }
+let cfg = loadCfg();
+
+// ---- state ----
+let state = { items:[], loop:true, idx:0, playlistName:null, bootTs:Date.now(), stopTimer:null, powerOff:false, running:false };
+
+// ---- api ----
+async function api(path, opts){
+  const base = (cfg.apiBase || DEFAULT_API).replace(/\/$/,"");
+  const r = await fetch(base + path, Object.assign({ headers:{ "Content-Type":"application/json" } }, opts));
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}
+function platform(){
+  const u = navigator.userAgent;
+  if(/Android/i.test(u)) return "android";
+  if(/Windows/i.test(u)) return "windows";
+  if(/CrOS|Linux armv|Raspbian/i.test(u)) return "rpi";
+  if(/SMART-TV|SmartTV|Tizen|Web0S|AppleTV/i.test(u)) return "smarttv";
+  return "web";
+}
+async function storagePct(){
+  try { const e = await navigator.storage.estimate(); if(e && e.quota) return Math.round((e.usage/e.quota)*100); } catch {}
+  return 0;
+}
+
+// ---- pairing ----
+async function pair(apiBase, token){
+  cfg.apiBase = apiBase;
+  const res = await api("/signage/player/register", {
+    method:"POST",
+    body: JSON.stringify({ token, resolution: screen.width+"×"+screen.height,
+      orientation: (screen.width>=screen.height?"landscape":"portrait"), platform: platform() })
+  });
+  cfg.token = res.token || token; cfg.screenId = res.screen_id; cfg.name = res.name;
+  saveCfg(cfg);
+  return res;
+}
+
+// ---- heartbeat ----
+async function heartbeat(){
+  if(!cfg.screenId) return null;
+  try {
+    const uptime = Math.min(100, 95 + ((Date.now()-state.bootTs)/36e5)%5);
+    const res = await api(`/signage/player/${cfg.screenId}/heartbeat`, {
+      method:"POST", body: JSON.stringify({ token: cfg.token, cpu: 0, storage: await storagePct(), uptime: +uptime.toFixed(1) })
+    });
+    setPill(true);
+    if(res && res.command) handleCommand(res.command);
+    return res;
+  } catch(e){ setPill(false); return null; }
+}
+
+// ---- playlist ----
+async function pullPlaylist(){
+  const res = await api(`/signage/player/${cfg.screenId}/playlist?token=${encodeURIComponent(cfg.token)}`);
+  if(res && res.command) handleCommand(res.command);
+  state.items = (res && res.items) || [];
+  state.loop = res ? !!res.loop : true;
+  state.playlistName = res && res.playlist ? res.playlist.name : null;
+  try { localStorage.setItem(LS+"_cache", JSON.stringify({ items: state.items, loop: state.loop, name: state.playlistName })); } catch {}
+  return res;
+}
+function loadCache(){
+  try { const c = JSON.parse(localStorage.getItem(LS+"_cache")); if(c){ state.items=c.items||[]; state.loop=c.loop!==false; state.playlistName=c.name; } } catch {}
+}
+
+function mediaUrl(u){
+  if(!u) return "";
+  if(/^https?:\/\//i.test(u)) return u;
+  const base = (cfg.apiBase || DEFAULT_API).replace(/\/easyreach$/,"");
+  return base + u;  // backend returns /easyreach/... paths
+}
+
+async function reportPlay(item, ok, err){
+  try { await api(`/signage/player/${cfg.screenId}/play-event`, { method:"POST",
+    body: JSON.stringify({ token: cfg.token, media_id: item.id, media_name: item.name, duration: item.duration||0, ok: !!ok, error: err||null }) }); } catch {}
+}
+
+// ---- rendering ----
+function clearStage(){ if(state.stopTimer){ clearTimeout(state.stopTimer); state.stopTimer=null; } stage.innerHTML=""; }
+
+function showIdle(txt){
+  clearStage();
+  const d = document.createElement("div"); d.className="idle";
+  d.innerHTML = '<div class="logo">ISF Infra</div><div class="sub">'+(txt||"Waiting for content…")+'</div>';
+  stage.appendChild(d);
+}
+
+function playItem(item, done){
+  clearStage();
+  const dur = Math.max(3, item.duration||10) * 1000;
+  const url = mediaUrl(item.url);
+  const next = () => { reportPlay(item, true); done(); };
+  const fail = (e) => { reportPlay(item, false, String(e).slice(0,120)); done(); };
+
+  if(item.type === "video"){
+    const v = document.createElement("video");
+    v.src = url; v.autoplay = true; v.muted = false; v.playsInline = true; v.controls = false;
+    v.onended = next;
+    v.onerror = () => fail("video load error");
+    // hard cap: duration from CMS, or let it run to end (use whichever is longer, capped at 2h)
+    state.stopTimer = setTimeout(next, Math.min(2*3600*1000, Math.max(dur, 60*1000)));
+    stage.appendChild(v);
+    v.play().catch(()=>{ /* some kiosks need muted autoplay */ v.muted = true; v.play().catch(fail); });
+  } else if(item.type === "image"){
+    const img = document.createElement("img");
+    img.src = url; img.onerror = () => fail("image load error");
+    stage.appendChild(img);
+    state.stopTimer = setTimeout(next, dur);
+  } else if(item.type === "pdf"){
+    const f = document.createElement("iframe");
+    f.src = url + "#toolbar=0&navpanes=0&view=FitH";
+    stage.appendChild(f);
+    state.stopTimer = setTimeout(next, dur);
+  } else { // web / widget
+    const f = document.createElement("iframe");
+    f.src = url; f.setAttribute("sandbox","allow-scripts allow-same-origin allow-popups");
+    f.onerror = () => fail("web load error");
+    stage.appendChild(f);
+    state.stopTimer = setTimeout(next, dur);
+  }
+}
+
+// ---- main playback loop ----
+async function playbackCycle(){
+  if(state.powerOff){ showIdle("Screen is off"); return; }
+  if(!state.items.length){ showIdle("No content assigned to this screen yet."); return; }
+  if(state.idx >= state.items.length){
+    state.idx = 0;
+    // refresh playlist at the end of each loop so new pushes/schedules take effect
+    try { await pullPlaylist(); } catch {}
+    if(!state.loop || !state.items.length){ showIdle(state.items.length?"":"No content assigned."); if(!state.loop) return; }
+  }
+  const item = state.items[state.idx++];
+  if(!item){ showIdle(); return; }
+  playItem(item, () => { if(!state.powerOff) playbackCycle(); });
+}
+
+// ---- commands ----
+function handleCommand(cmd){
+  if(cmd === "refresh"){ pullPlaylist().then(()=>{ state.idx=0; }); }
+  else if(cmd === "restart"){ setTimeout(()=>location.reload(), 500); }
+  else if(cmd === "screenshot"){ /* browsers cannot self-capture; no-op */ }
+}
+
+// ---- ui helpers ----
+function setPill(online){
+  $("pill").classList.add("show");
+  $("dot").classList.toggle("off", !online);
+  $("pillTxt").textContent = (cfg.name||"screen") + (online? " · online":" · offline (cached)");
+  clearTimeout(setPill._t); setPill._t = setTimeout(()=>$("pill").classList.remove("show"), 4000);
+}
+function openSetup(){
+  $("apiBase").value = cfg.apiBase || DEFAULT_API;
+  $("token").value = cfg.token || "";
+  $("setup").style.display = "flex";
+}
+function closeSetup(){ $("setup").style.display = "none"; }
+
+$("pairBtn").onclick = async () => {
+  $("setupErr").textContent = "";
+  const apiBase = $("apiBase").value.trim() || DEFAULT_API;
+  const token = $("token").value.trim();
+  if(!token){ $("setupErr").textContent = "Enter the enrollment token."; return; }
+  try { await pair(apiBase, token); closeSetup(); boot(); }
+  catch(e){ $("setupErr").textContent = "Pairing failed — check the API URL and token."; }
+};
+
+document.addEventListener("keydown", (e) => {
+  if(e.key==="s"||e.key==="S") openSetup();
+  if(e.key==="f"||e.key==="F"){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }
+});
+// hide the hint after a bit
+setTimeout(()=>{ const h=$("hint"); if(h) h.style.display="none"; }, 15000);
+
+// ---- boot ----
+async function boot(){
+  if(state.running) return;
+  if(!cfg.screenId || !cfg.token){ openSetup(); return; }
+  state.running = true;
+  state.bootTs = Date.now();
+  loadCache();
+  showIdle("Loading…");
+  try { await heartbeat(); } catch {}
+  try { await pullPlaylist(); } catch { /* keep cache */ }
+  state.idx = 0;
+  playbackCycle();
+  // heartbeat + playlist refresh on timers
+  setInterval(heartbeat, 60*1000);
+  setInterval(async ()=>{ try { await pullPlaylist(); } catch {} }, 5*60*1000);
+}
+
+window.addEventListener("load", boot);
+</script>
+</body>
+</html>
