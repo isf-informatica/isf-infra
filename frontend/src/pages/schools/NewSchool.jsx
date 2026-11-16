@@ -40,6 +40,7 @@ export default function NewSchool() {
     erp_domain: '', storage_domain: '', public_ip: '', lan_ip: '',
     storage_path: 'D:\\MediaStorage', nginx_port: 9006, https_port: 9000,
     ssl_thumbprint: '', sync_interval_min: 15, db_name: '',
+    org_location: '', event_start: '', event_end: '', auto_expire: 0,
   })
 
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }))
@@ -59,7 +60,10 @@ export default function NewSchool() {
     { value: 'school', label: 'School', icon: 'ti-school' },
     { value: 'college', label: 'College', icon: 'ti-certificate' },
     { value: 'institute', label: 'Institute', icon: 'ti-building-bank' },
+    { value: 'event', label: 'Event', icon: 'ti-calendar-event' },
+    { value: 'program', label: 'Program', icon: 'ti-flag' },
   ]
+  const isEvent = form.institution_type === 'event' || form.institution_type === 'program'
 
   return (
     <div className="min-h-screen font-sans" style={{ background: C.bgApp }}>
@@ -105,10 +109,10 @@ export default function NewSchool() {
               <div className="text-[14.5px] font-semibold mb-5" style={{ color: C.textPrimary }}>Institution details</div>
               <div className="mb-5">
                 <label className={labelCls} style={{ color: C.textSecondary }}>Institution type</label>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {typeOptions.map(({ value, label, icon }) => (
                     <button key={value} onClick={() => update('institution_type', value)}
-                      className="flex-1 py-3 rounded-xl text-[12.5px] font-semibold transition-all flex items-center justify-center gap-1.5"
+                      className="py-3 px-3 rounded-xl text-[12.5px] font-semibold transition-all flex items-center justify-center gap-1.5 grow basis-[28%]"
                       style={form.institution_type === value
                         ? { background: C.systemBg, color: C.brandFrom, border: `1.5px solid ${C.brandFrom}` }
                         : { background: C.surfaceAlt, color: C.textMuted, border: `1px solid ${C.border}` }}>
@@ -117,6 +121,41 @@ export default function NewSchool() {
                   ))}
                 </div>
               </div>
+
+              {isEvent && (
+                <div className="mb-5 p-4 rounded-xl" style={{ background: C.systemBg, border: `1px solid ${C.border}` }}>
+                  <div className="text-[12.5px] font-semibold mb-3 flex items-center gap-1.5" style={{ color: C.brandFrom }}>
+                    <i className="ti ti-calendar-event text-sm" aria-hidden="true"></i> Event / program details
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className={labelCls} style={{ color: C.textSecondary }}>Location / city</label>
+                      <input value={form.org_location} onChange={e => update('org_location', e.target.value)}
+                        placeholder="e.g. Prayagraj" className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+                    </div>
+                    <div>
+                      <label className={labelCls} style={{ color: C.textSecondary }}>Start date</label>
+                      <input type="date" value={form.event_start} onChange={e => update('event_start', e.target.value)}
+                        className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+                    </div>
+                    <div>
+                      <label className={labelCls} style={{ color: C.textSecondary }}>End date</label>
+                      <input type="date" value={form.event_end} onChange={e => update('event_end', e.target.value)}
+                        className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className={labelCls} style={{ color: C.textSecondary }}>When the event ends</label>
+                      <select value={form.auto_expire} onChange={e => update('auto_expire', Number(e.target.value))}
+                        className={inputCls} style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}>
+                        <option value={0}>Keep managing (no auto-expire)</option>
+                        <option value={1}>Stop managing automatically</option>
+                        <option value={2}>Stop managing + remote-wipe all devices</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 {[
                   ['Institution name', 'name', 'MBSE School'],

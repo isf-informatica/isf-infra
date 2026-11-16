@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDevices, addDevice, deleteDevice, getCommandResult } from '../../api/devices'
+import { bulkAddDevices } from '../../api/schools'
 import { sendCommand } from '../../api/commands'
 import useAuthStore from '../../store/authStore'
 
@@ -382,6 +383,11 @@ export default function Devices() {
   const [scriptInput, setScriptInput] = useState('')
   const [showScript, setShowScript] = useState(false)
   const [treeOpen, setTreeOpen] = useState(false)
+  const [showBulk, setShowBulk] = useState(false)
+  const [bulkText, setBulkText] = useState('')
+  const [bulkType, setBulkType] = useState('system')
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [bulkDone, setBulkDone] = useState(null)
   const [form, setForm] = useState({
     name: '', device_type: 'system',
     ip_address: '', mac_address: '', os: '', notes: ''
@@ -404,6 +410,19 @@ export default function Devices() {
       setForm({ name: '', device_type: 'system', ip_address: '', mac_address: '', os: '', notes: '' })
       fetchDevices()
     } catch (err) { alert(err.response?.data?.detail || 'Failed') }
+  }
+
+  const handleBulkAdd = async () => {
+    const names = bulkText.split('\n').map(s => s.trim()).filter(Boolean)
+    if (!names.length) return
+    setBulkBusy(true); setBulkDone(null)
+    try {
+      const res = await bulkAddDevices(id, names.map(name => ({ name, device_type: bulkType })))
+      setBulkDone(res.added)
+      setBulkText('')
+      fetchDevices()
+    } catch (err) { alert(err.response?.data?.detail || 'Bulk add failed') }
+    finally { setBulkBusy(false) }
   }
 
   const handleDelete = async (deviceId) => {
@@ -557,11 +576,18 @@ export default function Devices() {
             </div>
           </div>
         </div>
-        <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold text-white border-none cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
-          style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
-          <i className="ti ti-plus text-sm" aria-hidden="true"></i> Add system
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => { setBulkDone(null); setShowBulk(true) }}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[13px] font-semibold cursor-pointer transition-transform hover:scale-[1.02]"
+            style={{ color: C.textPrimary, background: C.surface, border: `1px solid ${C.border}` }}>
+            <i className="ti ti-stack-2 text-sm" aria-hidden="true"></i> Bulk add
+          </button>
+          <button onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold text-white border-none cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
+            style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
+            <i className="ti ti-plus text-sm" aria-hidden="true"></i> Add system
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -933,6 +959,36 @@ export default function Devices() {
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold text-white border-none cursor-pointer disabled:opacity-40 shadow-sm"
                 style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
                 <i className="ti ti-check text-[12px] mr-1" aria-hidden="true"></i>Add device
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulk && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(16,16,14,0.5)' }} onClick={() => setShowBulk(false)}>
+          <div className="w-full max-w-md rounded-2xl p-5" style={{ background: C.surface, border: `1px solid ${C.border}` }} onClick={e => e.stopPropagation()}>
+            <div className="text-[15px] font-bold mb-1" style={{ color: C.textPrimary }}>Bulk add devices</div>
+            <div className="text-[12px] mb-4" style={{ color: C.textSecondary }}>One device name per line. Each gets its own agent token for enrolment.</div>
+            <label className="block text-[12px] font-medium mb-1.5" style={{ color: C.textSecondary }}>Type</label>
+            <select value={bulkType} onChange={e => setBulkType(e.target.value)}
+              className="w-full mb-3 px-3 py-2 rounded-lg text-[13px] outline-none" style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }}>
+              <option value="system">System (PC)</option>
+              <option value="server">Server</option>
+            </select>
+            <label className="block text-[12px] font-medium mb-1.5" style={{ color: C.textSecondary }}>Device names</label>
+            <textarea value={bulkText} onChange={e => setBulkText(e.target.value)} rows={7}
+              placeholder={'KIOSK-01\nKIOSK-02\nGATE-SRV\n...'}
+              className="w-full px-3 py-2 rounded-lg text-[13px] outline-none font-mono" style={{ border: `1px solid ${C.border}`, background: C.surface, color: C.textPrimary }} />
+            {bulkDone != null && <div className="text-[12px] mt-2" style={{ color: C.success || '#157A47' }}>✓ {bulkDone} device(s) added.</div>}
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setShowBulk(false)}
+                className="flex-1 py-2.5 rounded-xl text-[13px] font-medium cursor-pointer"
+                style={{ color: C.textSecondary, border: `1px solid ${C.border}`, background: C.surface }}>Close</button>
+              <button onClick={handleBulkAdd} disabled={bulkBusy || !bulkText.trim()}
+                className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold text-white border-none cursor-pointer disabled:opacity-40 shadow-sm"
+                style={{ background: `linear-gradient(135deg, ${C.brandFrom}, ${C.brandTo})` }}>
+                {bulkBusy ? 'Adding…' : 'Add all'}
               </button>
             </div>
           </div>
