@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDevices, addDevice, deleteDevice, getCommandResult } from '../../api/devices'
 import { bulkAddDevices } from '../../api/schools'
+import api from '../../api/axios'
 import { sendCommand } from '../../api/commands'
 import useAuthStore from '../../store/authStore'
 
@@ -436,32 +437,28 @@ export default function Devices() {
 
   const downloadAgent = async (deviceId, deviceName) => {
     try {
-      const res = await fetch(
-        `https://dolphin-app-33jp4.ondigitalocean.app/easyreach/schools/${id}/devices/${deviceId}/generate-agent`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      if (!res.ok) throw new Error('Failed')
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
+      // Use the shared axios instance: same token (localStorage) + baseURL as every
+      // other call, so this works whether the token lives in the store or not.
+      const res = await api.get(`/easyreach/schools/${id}/devices/${deviceId}/generate-agent`, { responseType: 'blob' })
+      const url = URL.createObjectURL(res.data)
       const a = document.createElement('a')
       a.href = url; a.download = `easyreach_agent_${deviceName}.zip`; a.click()
       URL.revokeObjectURL(url)
-    } catch { alert('Failed to download agent ZIP') }
+    } catch (err) {
+      alert(err.response?.status === 401 ? 'Session expired — please sign in again.' : 'Failed to download agent ZIP')
+    }
   }
 
   const downloadServerAgent = async () => {
     try {
-      const res = await fetch(
-        `https://dolphin-app-33jp4.ondigitalocean.app/easyreach/schools/${id}/generate-server-agent`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      if (!res.ok) throw new Error('Failed')
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
+      const res = await api.get(`/easyreach/schools/${id}/generate-server-agent`, { responseType: 'blob' })
+      const url = URL.createObjectURL(res.data)
       const a = document.createElement('a')
       a.href = url; a.download = `easyreach_server_agent.zip`; a.click()
       URL.revokeObjectURL(url)
-    } catch { alert('Failed to download server agent ZIP') }
+    } catch (err) {
+      alert(err.response?.status === 401 ? 'Session expired — please sign in again.' : 'Failed to download server agent ZIP')
+    }
   }
 
   const handleAction = async (action) => {
